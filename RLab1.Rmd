@@ -1,0 +1,124 @@
+---
+title: "R Coding Lab Part 1"
+output: rmdformats::html_docco
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
+
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful! Refer to last Thursday's class notes for details on conflict resolution.**
+
+**Use only tools covered in our lectures**.
+
+# Playing With Cherry Blossom Race Data
+
+1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`. 
+
+
+```{r import_data}
+load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
+
+#Now write code to remove the specified column
+
+```
+
+
+2) The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976. 
+
+```{r summary}
+
+```
+
+
+3) You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to write a loop that removes observations that don't have age data.  
+Hints:  
+- The `is.na()` function may be useful. Use the `?is.na` command to pull up documentation on this function. It might be helpful to play around with a toy example like `c(1,2,NA,3)` to make sure you understand this new function!  
+- Depending on how you write your code, you may need to negate a logical vector using `!`. Ex: `!c(TRUE, TRUE, FALSE)` is identical to `c(FALSE, FALSE, TRUE)`.
+
+```{r filter_missing_age_loop}
+
+
+```
+
+ 4) Now use vectorization and the `is.na()` function to accomplish the same thing as the loop above.  
+How to check your work: If your loop produced a data frame called "dat.76.clean" and the vectorization approach produced a data frame called `dat.76.clean2`, the `identical(dat.76.clean,dat.76.clean2)` should return `TRUE`.
+
+```{r filter_missing_age_vectorization}
+
+
+```
+
+5) Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.  
+When you have a function written, run it on the 1976 data and use identical() to verify that your function and the first loop you wrote are doing the same thing.
+
+```{r filter_func}
+
+```
+
+6) Next, write a loop that combines all of the data from `CBdata.1_10` into one cleaned data frame. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.  
+Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
+
+```{r combine_dat}
+
+```
+
+7) Now that you have the combined data set for these 10 years, let's do some basic exploration:  
+a) How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?  
+b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
+
+# Playing with the indoor positioning system data
+
+The `IPS_sampledata` data set contains a fraction of the indoor positioning system data for 15 randomly sampled locations.This data set is loaded into memory using the chunk of R code below, complete the following exercises. 
+
+```{r eval=T, echo=T}
+# loads data set IPS_sampledata
+load("IPS_portion.RData")
+```
+
+### Variable dictionary
+
+- `time`: timestamp in milliseconds since midnight 01/01/1970 UTC
+
+- `scanMac`: MAC address of the scanning device (this is a handheld device)
+
+- `posX`, `posY` and `posZ`: the (x, y, z) physical coordinate of the scanning device
+
+- `orientation`: degree orientation of the user carrying the scanning device in degrees
+
+- `mac`: MAC address of an access point
+
+- `signal`: signal strength in dBm (Decibel-milliwatts)
+
+- `channel`: the channel frequency
+
+- `type`: type of device (access point = 3, device in adhoc mode = 1)
+
+### Let's clean up the data a bit
+
+1. First apply the `summary` function to the `IPS_data` to get a sense of what is available in that data frame. 
+
+2. Identify variables that need any `class` conversion. Attempting to avoid code-replication as much as possible, convert these variables into the correct class type.
+
+3. Because we only want data relative to access points, remove observations that correspond to any other type of device.
+
+4. Assess if there are any variables that provide redundant or no information. If so, remove them from the data frame.
+
+5. Note that the `time` variable is in milliseconds.  Transform it into seconds and then convert its class into a time format using the function `as.POSIXct`.
+
+
+### Examining the data more closely
+
+1. Create the function `tally_mac` whose only input is the MAC address of an access point, and returns the number of observations found in the data set for it.
+
+2. Use the function `unique` to identify the unique levels for `mac` found in the data set. 
+
+3. Using an approach learned in class together with `tally_mac`, tally the  number of observations for all access points in the data. While the researchers did their best to clean their data, some noise was introduced by access points on other floors.  Based on the number of counts, identify and remove likely suspects for access points read by mistake.
+
+4.  The orientation of the hand-held device considered was supposed to be exactly set to the 8 angles from 0-315 in increments of 45 degrees (360 is equivalent to 0). However, in practice the measured orientations were close to the 8 expected but had some error, so we'll need to group them.  Develop and apply a function to recode the orientation values as one of 0, 45, 90, 135, 180, 225, 270, 315. Call the recoded orientation variable `rec_orient`.
+
+5. Create the function `signal_summary` that takes as inputs a location (`posX`, `posY`, `posZ`), an orientation (`rec_orient`) and an access point id (`mac`).  The function must identify and subset the rows in `IPS_sampledata` corresponding to this unique combination, then it must calculate and return the mean and standard deviation for the corresponding signal strengths. 
+
+6.  Create a list where each entry corresponds to a named list including unique combination of a location, an orientation, and an access point.  Use this list in combination with `lapply` and `signal_summary` to generate a summary of signals for each unique combination. `Hint`: you may want to create a new variable with a unique identifier that combines location, `rec_orient` and `mac` to make your life simpler.  One way to go about this is using the `paste` function (see `?paste` for help on its use) with these variables in a row-by-row fashion.
