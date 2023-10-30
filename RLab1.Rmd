@@ -19,9 +19,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r import_data}
-load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
+load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly comme.,,nted line of code)
+
+#CBdata.1_10
+
+CBdata.1_10[[4]] -> dat.76 #selects only 
+#dat.76
 
 #Now write code to remove the specified column
+dat.76 <- dat.76[,-6]
+dat.76
 
 ```
 
@@ -29,6 +36,7 @@ load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example 
 2) The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976. 
 
 ```{r summary}
+summary(dat.76)
 
 ```
 
