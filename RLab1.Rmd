@@ -48,6 +48,17 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
+dat.76.clean = as.data.frame(matrix(nrow=481,ncol=9))
+colnames(dat.76.clean) <- colnames(dat.76)
+n<- 1
+for (i in 1:dim(dat.76)[1])
+  { 
+  if(is.na(dat.76$Age[i]) == FALSE)
+    { dat.76.clean[n,] <- dat.76[i,] 
+    n<-n+1
+  }
+  #else dat.76.clean[-i,]
+  }
 
 ```
 
@@ -56,7 +67,10 @@ How to check your work: If your loop produced a data frame called "dat.76.clean"
 
 ```{r filter_missing_age_vectorization}
 
+dat.76.clean2 <- dat.76[!is.na(dat.76$Age),]
 
+
+identical(dat.76.clean,dat.76.clean2)
 ```
 
 5) Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.  
