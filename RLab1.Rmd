@@ -82,6 +82,9 @@ When you have a function written, run it on the 1976 data and use identical() to
 
 ```{r filter_func}
 
+# function with df as input, sets size and names the same as input
+# the for loop check if the row has missing Age values and only adds rows without missing values
+#  returns a cleaned df
 filter.func <- function(data) {
   clean_data <- as.data.frame(matrix(nrow = nrow(data), ncol = ncol(data)))
   colnames(clean_data) <- colnames(data)
@@ -96,10 +99,13 @@ filter.func <- function(data) {
   return(clean_data[1:(n - 1), ])
 }
 
+#call function
 dat.76.clean3 <- filter.func(dat.76)
+# rename rows to sequential list of numbers
 rownames(dat.76.clean3) <- c(1:481)
 rownames(dat.76.clean) <- c(1:481)
 
+# returns TRUE if dfs are identical
 identical(dat.76.clean, dat.76.clean3)
 
 ```
@@ -108,9 +114,10 @@ identical(dat.76.clean, dat.76.clean3)
 Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
 
 ```{r combine_dat}
-
+# create an empty dataframe to store the cleaned data
 CBdata.1_10.clean <- data.frame()
 
+# loops through the dfs, removes the 6th col (Pis/Tis) and all rows with missing age values
 for (i in 1:length(CBdata.1_10)) {
 
   current_df <- CBdata.1_10[[i]]
@@ -120,11 +127,12 @@ for (i in 1:length(CBdata.1_10)) {
   CBdata.1_10.clean <- rbind(CBdata.1_10.clean, current_df)
 }
 
-
+# filters out 1976 and renames the rows to match
 filtered_df <- subset(CBdata.1_10.clean, Year == "1976")
 rownames(filtered_df) <- c(1:481)
 rownames(dat.76.clean) <- c(1:481)
 
+# return TRUE if dfs are identical
 identical(dat.76.clean, filtered_df)
 
 ```
@@ -133,56 +141,65 @@ identical(dat.76.clean, filtered_df)
 a) How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?  
 b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
 
-# Playing with the indoor positioning system data
 
-The `IPS_sampledata` data set contains a fraction of the indoor positioning system data for 15 randomly sampled locations.This data set is loaded into memory using the chunk of R code below, complete the following exercises. 
+**The data given only includes 1976-82, so we will be comparing 1976 to the first 7 years as the overall dataset, and the first 3 years to the next 4 for part b.**
 
-```{r eval=T, echo=T}
-# loads data set IPS_sampledata
-# load("IPS_portion.RData")
+```{r explore_dat_7a}
+
+mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976])
+mean_age_all <- mean(CBdata.1_10.clean$Age)
+
+t_test_result <- t.test(
+  x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976],
+  y = CBdata.1_10.clean$Age,
+  alternative = "two.sided"  
+)
+
+print(paste("mean age in 1976:", round(mean_age_1976, 2)))
+print(paste("mean age of first 7 years:", round(mean_age_all, 2)))
+
+print("T-test result:")
+print(t_test_result)
+```
+The t-test indicates that there is a significant difference (p-value = .0238)
+
+```{r explore_dat_7b}
+
+mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978])
+
+mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982])
+
+t_test_result <- t.test(
+  x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978],
+  y = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982],
+  alternative = "two.sided"
+)
+
+print(paste("mean age of the first 3 years:", round(mean_age_76_78, 2)))
+print(paste("mean age of the next 4 years:", round(mean_age_79_82, 2)))
+
+print("T-test result:")
+print(t_test_result)
+```
+The t-test indicates that there is a significant difference (p-value = 2.2e-16)
+
+```{r mean_age_plot}
+
+library(dplyr)
+library(ggplot2)
+
+mean_age_by_year <- CBdata.1_10.clean %>%
+  filter(Year >= 1976 & Year <= 1982) %>%
+  group_by(Year) %>%
+  summarize(mean_age = mean(Age))
+
+ggplot(data = mean_age_by_year, aes(x = Year, y = mean_age)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Year", y = "Mean Age") +
+  ggtitle("Mean Age for Each Year (1976-1982)")
+  
 ```
 
-### Variable dictionary
+The mean ages can also be compared visually by the plot shown above. There is an increasing trend in age.
 
-- `time`: timestamp in milliseconds since midnight 01/01/1970 UTC
-
-- `scanMac`: MAC address of the scanning device (this is a handheld device)
-
-- `posX`, `posY` and `posZ`: the (x, y, z) physical coordinate of the scanning device
-
-- `orientation`: degree orientation of the user carrying the scanning device in degrees
-
-- `mac`: MAC address of an access point
-
-- `signal`: signal strength in dBm (Decibel-milliwatts)
-
-- `channel`: the channel frequency
-
-- `type`: type of device (access point = 3, device in adhoc mode = 1)
-
-### Let's clean up the data a bit
-
-1. First apply the `summary` function to the `IPS_data` to get a sense of what is available in that data frame. 
-
-2. Identify variables that need any `class` conversion. Attempting to avoid code-replication as much as possible, convert these variables into the correct class type.
-
-3. Because we only want data relative to access points, remove observations that correspond to any other type of device.
-
-4. Assess if there are any variables that provide redundant or no information. If so, remove them from the data frame.
-
-5. Note that the `time` variable is in milliseconds.  Transform it into seconds and then convert its class into a time format using the function `as.POSIXct`.
-
-
-### Examining the data more closely
-
-1. Create the function `tally_mac` whose only input is the MAC address of an access point, and returns the number of observations found in the data set for it.
-
-2. Use the function `unique` to identify the unique levels for `mac` found in the data set. 
-
-3. Using an approach learned in class together with `tally_mac`, tally the  number of observations for all access points in the data. While the researchers did their best to clean their data, some noise was introduced by access points on other floors.  Based on the number of counts, identify and remove likely suspects for access points read by mistake.
-
-4.  The orientation of the hand-held device considered was supposed to be exactly set to the 8 angles from 0-315 in increments of 45 degrees (360 is equivalent to 0). However, in practice the measured orientations were close to the 8 expected but had some error, so we'll need to group them.  Develop and apply a function to recode the orientation values as one of 0, 45, 90, 135, 180, 225, 270, 315. Call the recoded orientation variable `rec_orient`.
-
-5. Create the function `signal_summary` that takes as inputs a location (`posX`, `posY`, `posZ`), an orientation (`rec_orient`) and an access point id (`mac`).  The function must identify and subset the rows in `IPS_sampledata` corresponding to this unique combination, then it must calculate and return the mean and standard deviation for the corresponding signal strengths. 
-
-6.  Create a list where each entry corresponds to a named list including unique combination of a location, an orientation, and an access point.  Use this list in combination with `lapply` and `signal_summary` to generate a summary of signals for each unique combination. `Hint`: you may want to create a new variable with a unique identifier that combines location, `rec_orient` and `mac` to make your life simpler.  One way to go about this is using the `paste` function (see `?paste` for help on its use) with these variables in a row-by-row fashion.
