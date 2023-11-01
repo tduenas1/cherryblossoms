@@ -41,7 +41,8 @@ dat.76
 summary(dat.76) #genrating summary for the table
 
 ```
-
+Mean: 32.09
+Median: 32
 
 3) You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to write a loop that removes observations that don't have age data.  
 Hints:  
