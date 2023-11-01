@@ -48,16 +48,16 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
-dat.76.clean = as.data.frame(matrix(nrow=481,ncol=9))
+dat.76.clean = as.data.frame(matrix(ncol=9))
 colnames(dat.76.clean) <- colnames(dat.76)
-n<- 1
-for (i in 1:dim(dat.76)[1])
+dat.76.clean[1,] <- dat.76[1,]
+
+for (i in 2:dim(dat.76)[1])
   { 
   if(is.na(dat.76$Age[i]) == FALSE)
-    { dat.76.clean[n,] <- dat.76[i,] 
-    n<-n+1
-  }
-  #else dat.76.clean[-i,]
+    { 
+      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] )
+    }
   }
 
 ```
