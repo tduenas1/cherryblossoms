@@ -101,7 +101,7 @@ filter.func <- function(data) {
   for (i in 1:nrow(data)) {
     if (!is.na(data$Age[i])) {
       clean_data[n, ] <- data[i, ]
-      n<- n +1
+      n <- n + 1
     }
   }
   
@@ -109,6 +109,9 @@ filter.func <- function(data) {
 }
 
 dat.76.clean3 <- filter.func(dat.76)
+rownames(dat.76.clean3) <- c(1:481)
+rownames(dat.76.clean) <- c(1:481)
+
 identical(dat.76.clean, dat.76.clean3)
 
 ```
@@ -132,6 +135,7 @@ for (i in 1:length(CBdata.1_10)) {
 
 filtered_df <- subset(CBdata.1_10.clean, Year == "1976")
 rownames(filtered_df) <- c(1:481)
+rownames(dat.76.clean) <- c(1:481)
 
 identical(dat.76.clean, filtered_df)
 
