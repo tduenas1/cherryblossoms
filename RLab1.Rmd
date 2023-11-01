@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`. 
 
 
-```{r import_data}
+```{r import_data, results = F}
 load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly comme.,,nted line of code)
 
 #CBdata.1_10
@@ -48,14 +48,14 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
-dat.76.clean = as.data.frame(matrix(nrow=481,ncol=9))
+dat.76.clean = as.data.frame(matrix(nrow = 481, ncol = 9))
 colnames(dat.76.clean) <- colnames(dat.76)
-n<- 1
+n <- 1
 for (i in 1:dim(dat.76)[1])
   { 
   if(is.na(dat.76$Age[i]) == FALSE)
     { dat.76.clean[n,] <- dat.76[i,] 
-    n<-n+1
+    n <- n + 1
   }
   #else dat.76.clean[-i,]
   }
@@ -68,9 +68,8 @@ How to check your work: If your loop produced a data frame called "dat.76.clean"
 ```{r filter_missing_age_vectorization}
 
 dat.76.clean2 <- dat.76[!is.na(dat.76$Age),]
-
-
 identical(dat.76.clean,dat.76.clean2)
+
 ```
 
 5) Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.  
@@ -78,12 +77,46 @@ When you have a function written, run it on the 1976 data and use identical() to
 
 ```{r filter_func}
 
+filter.func <- function(data) {
+  clean_data <- as.data.frame(matrix(nrow = nrow(data), ncol = ncol(data)))
+  colnames(clean_data) <- colnames(data)
+  n <- 1
+  for (i in 1:nrow(data)) {
+    if (!is.na(data$Age[i])) {
+      clean_data[n, ] <- data[i, ]
+      n<- n +1
+    }
+  }
+  
+  return(clean_data[1:(n - 1), ])
+}
+
+dat.76.clean3 <- filter.func(dat.76)
+identical(dat.76.clean, dat.76.clean3)
+
 ```
 
 6) Next, write a loop that combines all of the data from `CBdata.1_10` into one cleaned data frame. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.  
 Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
 
 ```{r combine_dat}
+
+CBdata.1_10.clean <- data.frame()
+
+for (i in 1:length(CBdata.1_10)) {
+
+  current_df <- CBdata.1_10[[i]]
+  current_df <- current_df[, -6]
+
+  current_df <- current_df[!is.na(current_df$Age), ]
+  CBdata.1_10.clean <- rbind(CBdata.1_10.clean, current_df)
+}
+
+
+filtered_df <- subset(CBdata.1_10.clean, Year == "1976")
+rownames(filtered_df) <- c(1:481)
+
+identical(dat.76.clean, filtered_df)
 
 ```
 
@@ -97,7 +130,7 @@ The `IPS_sampledata` data set contains a fraction of the indoor positioning syst
 
 ```{r eval=T, echo=T}
 # loads data set IPS_sampledata
-load("IPS_portion.RData")
+# load("IPS_portion.RData")
 ```
 
 ### Variable dictionary
