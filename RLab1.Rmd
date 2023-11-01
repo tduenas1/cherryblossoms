@@ -18,16 +18,22 @@ knitr::opts_chunk$set(echo = TRUE)
 1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`. 
 
 
+<<<<<<< HEAD
 ```{r import_data, results = F}
 load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly comme.,,nted line of code)
+=======
+```{r import_data}
+load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
+>>>>>>> f9fcd6282608d5f7d064fca548a97f2c8f1c3b3b
 
 #CBdata.1_10
 
-CBdata.1_10[[4]] -> dat.76 #selects only 
+CBdata.1_10[[4]] -> dat.76 #selecting only data from the table 4, containing data for year 1976
+
 #dat.76
 
 #Now write code to remove the specified column
-dat.76 <- dat.76[,-6]
+dat.76 <- dat.76[,-6] #Removing data from the column 6 labeled 'Pis/Tis'  
 dat.76
 
 ```
@@ -36,7 +42,7 @@ dat.76
 2) The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976. 
 
 ```{r summary}
-summary(dat.76)
+summary(dat.76) #genrating summary for the table
 
 ```
 
@@ -48,6 +54,7 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
+<<<<<<< HEAD
 dat.76.clean = as.data.frame(matrix(nrow = 481, ncol = 9))
 colnames(dat.76.clean) <- colnames(dat.76)
 n <- 1
@@ -58,7 +65,20 @@ for (i in 1:dim(dat.76)[1])
     n <- n + 1
   }
   #else dat.76.clean[-i,]
+=======
+dat.76.clean = as.data.frame(matrix(ncol=9))
+colnames(dat.76.clean) <- colnames(dat.76)
+dat.76.clean[1,] <- dat.76[1,]
+
+for (i in 2:dim(dat.76)[1])
+  { 
+  if(is.na(dat.76$Age[i]) == FALSE)
+    { 
+      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] )
+    }
+>>>>>>> f9fcd6282608d5f7d064fca548a97f2c8f1c3b3b
   }
+
 
 ```
 
