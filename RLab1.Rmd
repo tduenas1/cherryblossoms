@@ -18,13 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`. 
 
 
-<<<<<<< HEAD
+
 ```{r import_data, results = F}
 load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly comme.,,nted line of code)
-=======
-```{r import_data}
-load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
->>>>>>> f9fcd6282608d5f7d064fca548a97f2c8f1c3b3b
 
 #CBdata.1_10
 
@@ -54,7 +50,7 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
-<<<<<<< HEAD
+
 dat.76.clean = as.data.frame(matrix(nrow = 481, ncol = 9))
 colnames(dat.76.clean) <- colnames(dat.76)
 n <- 1
@@ -65,7 +61,8 @@ for (i in 1:dim(dat.76)[1])
     n <- n + 1
   }
   #else dat.76.clean[-i,]
-=======
+}
+  
 dat.76.clean = as.data.frame(matrix(ncol=9))
 colnames(dat.76.clean) <- colnames(dat.76)
 dat.76.clean[1,] <- dat.76[1,]
@@ -76,7 +73,7 @@ for (i in 2:dim(dat.76)[1])
     { 
       dat.76.clean <- rbind(dat.76.clean,dat.76[i,] )
     }
->>>>>>> f9fcd6282608d5f7d064fca548a97f2c8f1c3b3b
+
   }
 
 
