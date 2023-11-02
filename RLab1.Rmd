@@ -147,15 +147,11 @@ identical(dat.76.clean, filtered_df)
 
 ```
 
-7)  Now that you have the combined data set for these 10 years, let's do some basic exploration:\
+7)  Now that you have the combined data set for these 10 years, let's do some basic exploration:
 
-```{=html}
-<!-- -->
-```
 a)  How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?\
 b)  Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
 
-**The data given only includes 1976-82, so we will be comparing 1976 to the first 7 years as the overall dataset, and the first 3 years to the next 4 for part b.**
 
 ```{r explore_dat_7a}
 # finds mean age of year 1976
@@ -163,47 +159,49 @@ mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976])
 # finds mean of age of all
 mean_age_all <- mean(CBdata.1_10.clean$Age)
 
-# runs the t test
+# runs the one sample t test
 t_test_result <- t.test(
   x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976],
-  y = CBdata.1_10.clean$Age,
+  mu = mean_age_all,
   alternative = "two.sided"  
 )
 
 #prints out results
 print(paste("mean age in 1976:", round(mean_age_1976, 2)))
-print(paste("mean age of first 7 years:", round(mean_age_all, 2)))
+print(paste("mean age of first 10 years:", round(mean_age_all, 2)))
 
 print("T-test result:")
 print(t_test_result)
 ```
+To compare the mean age from 1976 to the mean age of the entire dataset (1973 to 1982), we ran one sample t-test (two-tailed). The null hypothesis (H0) posited that there is no significant difference in mean ages between the sample (1976) and the population mean (1973 to 1982), while the alternative hypothesis (H1) suggested the presence of a significant difference.
 
-The t-test indicates that there is a significant difference (p-value = .0238)
+The analysis yielded a statistically significant result, with the p-value of .02244 falling below the chosen alpha level (0.05). Consequently, we reject the null hypothesis, providing strong evidence that a significant difference exists between the sample mean age, and the population mean age. 
 
 ```{r explore_dat_7b}
-# mean of years from 1976 to 1978
-mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
-                                             %in% 1976:1978]) 
-# mean of years from 1979 to 1982
-mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year 
-                                             %in% 1979:1982]) 
+# mean of years from 1973 to 1977
+mean_age_73_77 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
+                                             %in% 1973:1977]) 
+# mean of years from 1978 to 1982
+mean_age_78_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year 
+                                             %in% 1978:1982]) 
 
-# runs t test
+# runs the two sample t test
 t_test_result <- t.test(
-  x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978],
-  y = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982],
+  x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1973:1977],
+  y = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1978:1982],
   alternative = "two.sided"
 )
 
 # prints the results
-print(paste("mean age of the first 3 years:", round(mean_age_76_78, 2)))
-print(paste("mean age of the next 4 years:", round(mean_age_79_82, 2)))
+print(paste("mean age of the first 5 years:", round(mean_age_73_77, 2)))
+print(paste("mean age of the next 5 years:", round(mean_age_78_82, 2)))
 
 print("T-test result:")
 print(t_test_result)
 ```
+To compare the mean age from the first five years (1973-1977) to the mean age of the next five years (1978 to 1982) we ran a two sample t-test (two-tailed). The null hypothesis (H0) posited that there is no significant difference in mean ages between the two groups, while the alternative hypothesis (H1) suggested the presence of a significant difference.
 
-The t-test indicates that there is a significant difference (p-value = 2.2e-16)
+The analysis yielded a statistically significant result, with the p-value of 2.2e-16 falling below the chosen alpha level (0.05). Consequently, we reject the null hypothesis, providing strong evidence that a significant difference exists in the mean ages of the two groups.
 
 ```{r mean_age_plot}
 
@@ -212,18 +210,17 @@ library(ggplot2)
 
 # finds the mean age by year
 mean_age_by_year <- CBdata.1_10.clean %>%
-  filter(Year >= 1976 & Year <= 1982) %>%
+  filter(Year >= 1973 & Year <= 1982) %>%
   group_by(Year) %>%
   summarize(mean_age = mean(Age))
 
 # plots the mean age
-ggplot(data = mean_age_by_year, aes(x = Year, y = mean_age)) +
-  geom_line() +
+ggplot(data = mean_age_by_year, aes(x = as.factor(Year), y = mean_age)) +
   geom_point() +
   labs(x = "Year", y = "Mean Age") +
-  ggtitle("Mean Age for Each Year (1976-1982)") +
+  ggtitle("Mean Age for Each Year (1973-1982)") +
+  scale_x_discrete(labels = c("1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982")) +
   theme_bw()
-  
 ```
 
-The mean ages can also be compared visually by the plot shown above. There is an increasing trend in age.
+The mean ages can also be compared visually by the plot shown above.
