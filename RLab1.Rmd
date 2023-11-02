@@ -15,53 +15,53 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Playing With Cherry Blossom Race Data
 
-1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`. 
-
-
+1)  First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`.
 
 ```{r import_data, results = F}
-load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly comme.,,nted line of code)
+# load cherry blossom data
+load("CBdata.1_10.RData")
 
-#CBdata.1_10
+# select table 4 data (data from year 1976)
+CBdata.1_10[[4]] -> dat.76 
 
-CBdata.1_10[[4]] -> dat.76 #selecting only data from the table 4, containing data for year 1976
 
-#dat.76
-
-#Now write code to remove the specified column
-dat.76 <- dat.76[,-6] #Removing data from the column 6 labeled 'Pis/Tis'  
+# remove Pis/Tis column
+dat.76 <- dat.76[,-6] 
 dat.76
 
 ```
 
-
-2) The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976. 
+2)  The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976.
 
 ```{r summary}
-summary(dat.76) #genrating summary for the table
+# dat.76 summary
+summary(dat.76) 
 
 ```
-Mean: 32.09
-Median: 32
 
-3) You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to write a loop that removes observations that don't have age data.  
-Hints:  
-- The `is.na()` function may be useful. Use the `?is.na` command to pull up documentation on this function. It might be helpful to play around with a toy example like `c(1,2,NA,3)` to make sure you understand this new function!  
-- Depending on how you write your code, you may need to negate a logical vector using `!`. Ex: `!c(TRUE, TRUE, FALSE)` is identical to `c(FALSE, FALSE, TRUE)`.
+**The mean recorded age for 1976 is 32.09. The median recorded age for 1976 is 32.**
+
+3)  You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to write a loop that removes observations that don't have age data.\
+    Hints:\
+
+-   The `is.na()` function may be useful. Use the `?is.na` command to pull up documentation on this function. It might be helpful to play around with a toy example like `c(1,2,NA,3)` to make sure you understand this new function!\
+-   Depending on how you write your code, you may need to negate a logical vector using `!`. Ex: `!c(TRUE, TRUE, FALSE)` is identical to `c(FALSE, FALSE, TRUE)`.
 
 ```{r filter_missing_age_loop}
 
-
+# new variable data into data frame
 dat.76.clean = as.data.frame(matrix(ncol=9))
+# make column names of new variable equal to dat.76
 colnames(dat.76.clean) <- colnames(dat.76)
+# sets first row equal between both data frames
 dat.76.clean[1,] <- dat.76[1,]
 
-#loops through the data
+# for loop removing NA age data
 for (i in 2:dim(dat.76)[1])
   { 
-  if(is.na(dat.76$Age[i]) == FALSE)
+  if(is.na(dat.76$Age[i]) == FALSE) # selects data with NA age
     { 
-      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] ) # removes taht dosent have age 
+      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] ) # removes data with NA age
     }
 
   }
@@ -69,68 +69,76 @@ for (i in 2:dim(dat.76)[1])
 
 ```
 
- 4) Now use vectorization and the `is.na()` function to accomplish the same thing as the loop above.  
-How to check your work: If your loop produced a data frame called "dat.76.clean" and the vectorization approach produced a data frame called `dat.76.clean2`, the `identical(dat.76.clean,dat.76.clean2)` should return `TRUE`.
+4)  Now use vectorization and the `is.na()` function to accomplish the same thing as the loop above.\
+    How to check your work: If your loop produced a data frame called "dat.76.clean" and the vectorization approach produced a data frame called `dat.76.clean2`, the `identical(dat.76.clean,dat.76.clean2)` should return `TRUE`.
 
 ```{r filter_missing_age_vectorization}
-
+# selects all the data that doesn't have NA in age
 dat.76.clean2 <- dat.76[!is.na(dat.76$Age),]
+
+# checks whether df's are identical
 identical(dat.76.clean,dat.76.clean2)
 
 ```
 
-5) Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.  
-When you have a function written, run it on the 1976 data and use identical() to verify that your function and the first loop you wrote are doing the same thing.
+5)  Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.\
+    When you have a function written, run it on the 1976 data and use identical() to verify that your function and the first loop you wrote are doing the same thing.
 
 ```{r filter_func}
 
-# function with df as input, sets size and names the same as input
-# the for loop check if the row has missing Age values and only adds rows without missing values
-#  returns a cleaned df
+# function with df as input
+# returns a cleaned df
 filter.func <- function(data) {
+  # sets size of df the same as input
   clean_data <- as.data.frame(matrix(nrow = nrow(data), ncol = ncol(data)))
+  # sets column names of df same as input
   colnames(clean_data) <- colnames(data)
   n <- 1
+  # for loop to remove NA for age
   for (i in 1:nrow(data)) {
+    # if Age is not NA, add the row to the new df
     if (!is.na(data$Age[i])) {
       clean_data[n, ] <- data[i, ]
       n <- n + 1
     }
   }
-  
+  # returns cleaned df
   return(clean_data[1:(n - 1), ])
 }
 
-#call function
+# call function
 dat.76.clean3 <- filter.func(dat.76)
 # rename rows to sequential list of numbers
 rownames(dat.76.clean3) <- c(1:481)
 rownames(dat.76.clean) <- c(1:481)
 
-# returns TRUE if dfs are identical
+# checks whether df's are identical
 identical(dat.76.clean, dat.76.clean3)
 
 ```
 
-6) Next, write a loop that combines all of the data from `CBdata.1_10` into one cleaned data frame. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.  
-Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
+6)  Next, write a loop that combines all of the data from `CBdata.1_10` into one cleaned data frame. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.\
+    Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`.
 
 ```{r combine_dat}
-# create an empty dataframe to store the cleaned data
+# creates an empty dataframe to store the cleaned data
 CBdata.1_10.clean <- data.frame()
 
-# loops through the dfs, removes the 6th col (Pis/Tis) and all rows with missing age values
+# loops through the df and gives cleaned df
 for (i in 1:length(CBdata.1_10)) {
 
-  current_df <- CBdata.1_10[[i]]
-  current_df <- current_df[, -6]
-
-  current_df <- current_df[!is.na(current_df$Age), ]
-  CBdata.1_10.clean <- rbind(CBdata.1_10.clean, current_df)
+  current_df <- CBdata.1_10[[i]] # selects a df in the df
+  current_df <- current_df[, -6] # removes Pis/Tis column
+  
+  # selects rows without NA age
+  current_df <- current_df[!is.na(current_df$Age), ] 
+  # binds the cleaned out df into a large df
+  CBdata.1_10.clean <- rbind(CBdata.1_10.clean, current_df) 
 }
 
 # filters out 1976 and renames the rows to match
 filtered_df <- subset(CBdata.1_10.clean, Year == "1976")
+# sets rownames equal to eachoter
 rownames(filtered_df) <- c(1:481)
 rownames(dat.76.clean) <- c(1:481)
 
@@ -139,19 +147,23 @@ identical(dat.76.clean, filtered_df)
 
 ```
 
-7) Now that you have the combined data set for these 10 years, let's do some basic exploration:  
-a) How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?  
-b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
+7)  Now that you have the combined data set for these 10 years, let's do some basic exploration:\
 
+```{=html}
+<!-- -->
+```
+a)  How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?\
+b)  Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
 
 **The data given only includes 1976-82, so we will be comparing 1976 to the first 7 years as the overall dataset, and the first 3 years to the next 4 for part b.**
 
 ```{r explore_dat_7a}
+# finds mean age of year 1976
+mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976]) 
+# finds mean of age of all
+mean_age_all <- mean(CBdata.1_10.clean$Age)
 
-mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976]) #finds mean age of year 1976
-mean_age_all <- mean(CBdata.1_10.clean$Age) #finds mean of age of all
-
-#runs the t test
+# runs the t test
 t_test_result <- t.test(
   x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976],
   y = CBdata.1_10.clean$Age,
@@ -165,13 +177,16 @@ print(paste("mean age of first 7 years:", round(mean_age_all, 2)))
 print("T-test result:")
 print(t_test_result)
 ```
+
 The t-test indicates that there is a significant difference (p-value = .0238)
 
 ```{r explore_dat_7b}
-
-mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978]) #mean of years from 1976 to 1978
-
-mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982]) #mean of years from 1979 to 1982
+# mean of years from 1976 to 1978
+mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
+                                             %in% 1976:1978]) 
+# mean of years from 1979 to 1982
+mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year 
+                                             %in% 1979:1982]) 
 
 # runs t test
 t_test_result <- t.test(
@@ -180,13 +195,14 @@ t_test_result <- t.test(
   alternative = "two.sided"
 )
 
-#prints the results
+# prints the results
 print(paste("mean age of the first 3 years:", round(mean_age_76_78, 2)))
 print(paste("mean age of the next 4 years:", round(mean_age_79_82, 2)))
 
 print("T-test result:")
 print(t_test_result)
 ```
+
 The t-test indicates that there is a significant difference (p-value = 2.2e-16)
 
 ```{r mean_age_plot}
@@ -194,20 +210,20 @@ The t-test indicates that there is a significant difference (p-value = 2.2e-16)
 library(dplyr)
 library(ggplot2)
 
-#finds the mean age by year
+# finds the mean age by year
 mean_age_by_year <- CBdata.1_10.clean %>%
   filter(Year >= 1976 & Year <= 1982) %>%
   group_by(Year) %>%
   summarize(mean_age = mean(Age))
 
-#plots the mean age
+# plots the mean age
 ggplot(data = mean_age_by_year, aes(x = Year, y = mean_age)) +
   geom_line() +
   geom_point() +
   labs(x = "Year", y = "Mean Age") +
-  ggtitle("Mean Age for Each Year (1976-1982)")
+  ggtitle("Mean Age for Each Year (1976-1982)") +
+  theme_bw()
   
 ```
 
 The mean ages can also be compared visually by the plot shown above. There is an increasing trend in age.
-
