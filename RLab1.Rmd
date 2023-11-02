@@ -51,15 +51,17 @@ Hints:
 
 ```{r filter_missing_age_loop}
 
+
 dat.76.clean = as.data.frame(matrix(ncol=9))
 colnames(dat.76.clean) <- colnames(dat.76)
 dat.76.clean[1,] <- dat.76[1,]
 
+#loops through the data
 for (i in 2:dim(dat.76)[1])
   { 
   if(is.na(dat.76$Age[i]) == FALSE)
     { 
-      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] )
+      dat.76.clean <- rbind(dat.76.clean,dat.76[i,] ) # removes taht dosent have age 
     }
 
   }
@@ -146,15 +148,17 @@ b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry b
 
 ```{r explore_dat_7a}
 
-mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976])
-mean_age_all <- mean(CBdata.1_10.clean$Age)
+mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976]) #finds mean age of year 1976
+mean_age_all <- mean(CBdata.1_10.clean$Age) #finds mean of age of all
 
+#runs the t test
 t_test_result <- t.test(
   x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976],
   y = CBdata.1_10.clean$Age,
   alternative = "two.sided"  
 )
 
+#prints out results
 print(paste("mean age in 1976:", round(mean_age_1976, 2)))
 print(paste("mean age of first 7 years:", round(mean_age_all, 2)))
 
@@ -165,16 +169,18 @@ The t-test indicates that there is a significant difference (p-value = .0238)
 
 ```{r explore_dat_7b}
 
-mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978])
+mean_age_76_78 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978]) #mean of years from 1976 to 1978
 
-mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982])
+mean_age_79_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982]) #mean of years from 1979 to 1982
 
+# runs t test
 t_test_result <- t.test(
   x = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1976:1978],
   y = CBdata.1_10.clean$Age[CBdata.1_10.clean$Year %in% 1979:1982],
   alternative = "two.sided"
 )
 
+#prints the results
 print(paste("mean age of the first 3 years:", round(mean_age_76_78, 2)))
 print(paste("mean age of the next 4 years:", round(mean_age_79_82, 2)))
 
@@ -188,11 +194,13 @@ The t-test indicates that there is a significant difference (p-value = 2.2e-16)
 library(dplyr)
 library(ggplot2)
 
+#finds the mean age by year
 mean_age_by_year <- CBdata.1_10.clean %>%
   filter(Year >= 1976 & Year <= 1982) %>%
   group_by(Year) %>%
   summarize(mean_age = mean(Age))
 
+#plots the mean age
 ggplot(data = mean_age_by_year, aes(x = Year, y = mean_age)) +
   geom_line() +
   geom_point() +
