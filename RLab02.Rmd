@@ -22,14 +22,17 @@ library(dplyr)
 load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
 
 #Now write code to remove the specified column
+CBdata.1_10[[4]] -> dat.76 
 
+dat.76 <- dat.76[,-6] 
+dat.76
 ```
 
 
 2) Use the `summarise()` function to find the mean and median recorded ages in 1976. 
 
 ```{r summary}
-
+summary(dat.76) 
 ```
 
 
@@ -37,7 +40,7 @@ load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example 
 
 
 ```{r remove_missing_age}
-
+dat.76.clean2 <- dat.76[!is.na(dat.76$Age),]
 
 ```
 
