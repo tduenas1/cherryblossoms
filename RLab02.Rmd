@@ -1,0 +1,113 @@
+---
+title: "R Coding Lab Part 2"
+output: rmdformats::html_docco
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
+
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful! **
+
+
+# Playing With Cherry Blossom Race Data
+
+1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis` using a `dplyr` function. 
+
+
+```{r import_data}
+library(dplyr)
+load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
+
+#Now write code to remove the specified column
+
+```
+
+
+2) Use the `summarise()` function to find the mean and median recorded ages in 1976. 
+
+```{r summary}
+
+```
+
+
+3) You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to use `dplyr` to remove the data with missing age. This should not be a loop!  
+
+
+```{r remove_missing_age}
+
+
+```
+
+
+4) Last week you wrote a loop to combine all of the data from `CBdata.1_10` into one cleaned data frame. Use the function `bind_rows()` from `dplyr` to accomplish this same task. use the `?` command to look up documentation on functions you're not familar with like this: `?bind_rows`. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.  
+Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
+
+```{r combine_dat}
+
+```
+
+5) Now that you have the combined data set for these 10 years, let's compare some basic results to what you found last week. Use piping and `dplyr` functions in your computations.  
+a) Calculate the average of the recorded ages in 1976 and that same average over the entire `CBdata.1_10` data set, and make sure these numbers match the ones you found in Lab 1.  
+b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. Compute the average participant age over the first five years and the average age over years 6-10, and make sure these numbers match the ones you found in Lab 1.  
+
+
+6) Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
+a) use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements. 
+b) Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of the first 10 races. Store this information in a vector or data frame.
+c) Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
+d) Use a `join` function to add precipitation `PRCP`  and minimum daily temperature `TMIN` columns to your cherry blossom data set.
+
+# Playing with the indoor positioning system data
+
+The `IPS_sampledata` data set contains a fraction of the indoor positioning system data for 15 randomly sampled locations.This data set is loaded into memory using the chunk of R code below, complete the following exercises. 
+
+```{r eval=T, echo=T}
+# loads data set IPS_sampledata
+load("IPS_portion.RData")
+```
+
+### Variable dictionary
+
+- `time`: timestamp in milliseconds since midnight 01/01/1970 UTC
+
+- `scanMac`: MAC address of the scanning device (this is a handheld device)
+
+- `posX`, `posY` and `posZ`: the (x, y, z) physical coordinate of the scanning device
+
+- `orientation`: degree orientation of the user carrying the scanning device in degrees
+
+- `mac`: MAC address of an access point
+
+- `signal`: signal strength in dBm (Decibel-milliwatts)
+
+- `channel`: the channel frequency
+
+- `type`: type of device (access point = 3, device in adhoc mode = 1)
+
+### Let's clean up the data a bit
+
+1. Apply the same `class` conversions you did last week to get these variables into the correct class type. Use `dplyr` functions and piping to complete this operation (there are many ways to do so). If you'd like to `mutate` multiple columns at once, the `across()` function might be useful!
+
+2. Because we only want data relative to access points, remove observations that correspond to any other type of device using `dplyr` functions.
+
+3. Last week you identified variables that provide redundant or no information. Remove them from the data frame using `dplyr` functions. 
+
+4. Note that the `time` variable is in milliseconds.  Use `dplyr` to transform it into seconds and then convert its class into a time format using the function `as.POSIXct`.
+
+5. Convert this data set to a more wide format by creating one column for each access point, with each of those columns containing the corresponding signal strengths. Hint: you should end up with a data frame that has a lot fewer rows!  
+Set this data set aside and use the long format data for the rest of the assignment
+
+
+### Examining the data more closely
+
+1. Using grouping and `dplyr` functions, tally the  number of observations for all access points in the data. 
+
+2. While the researchers did their best to clean their data, some noise was introduced by access points on other floors.  Based on the number of counts, identify and remove likely suspects for access points read by mistake, again using `dplyr` functions.
+
+3.  The orientation of the hand-held device considered was supposed to be exactly set to the 8 angles from 0-315 in increments of 45 degrees (360 is equivalent to 0). However, in practice the measured orientations were close to the 8 expected but had some error.  Use the `case_when` function to recode the orientation values as one of 0, 45, 90, 135, 180, 225, 270, 315. Call the recoded orientation variable `rec_orient`.
+
+4. Last week you created the function `signal_summary` that takes as inputs a location (`posX`, `posY`, `posZ`), an orientation (`rec_orient`) and an access point id (`mac`).  The function identified and subset the rows in `IPS_sampledata` corresponding to this unique combination, then calculated and returned the mean and standard deviation for the corresponding signal strengths. You then used `lapply` to compute mean and standard deviation values for all combinations of location, orientation, and access point ID. 
+Use piping,`summarise()`, and other `dplyr` functions to run this same computation without the use of loops or `lapply`. Compare your results with those from last week to confirm you're doing the right thing!
