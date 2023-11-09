@@ -17,15 +17,18 @@ knitr::opts_chunk$set(echo = TRUE)
 1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis` using a `dplyr` function. 
 
 
-```{r import_data}
+```{r import_data, message = F}
+# load dplyr package
 library(dplyr)
-load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
 
-dat.76 <- tibble(CBdata.1_10[[4]])
+# load cherry blossom data
+load("CBdata.1_10.RData")
 
-#Now write code to remove the specified column
-dat.76 <- dat.76 %>% 
-                select(-`PiS/TiS`)
+# select data from year 1976
+dat.76 <- data.frame(CBdata.1_10[[4]])
+
+# remove column 'Pis/Tis'
+dat.76 <- dat.76 %>% select(-"PiS.TiS")
 
 ```
 
@@ -33,8 +36,8 @@ dat.76 <- dat.76 %>%
 2) Use the `summarise()` function to find the mean and median recorded ages in 1976. 
 
 ```{r summary}
-dat.76 %>% 
-  summarise(mean = mean(Age), median = median(Age)) 
+# find mean and median recorded ages with summarise()
+dat.76 %>% summarise(mean = mean(Age), median = median(Age)) 
 ```
 
 
@@ -42,9 +45,9 @@ dat.76 %>%
 
 
 ```{r remove_missing_age}
-
+# remove data with missing age
 dat.76.clean <- dat.76 %>% 
-                  filter(!is.na(Age))
+  filter(!is.na(Age))
 ```
 
 
@@ -52,6 +55,16 @@ dat.76.clean <- dat.76 %>%
 Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
 
 ```{r combine_dat}
+cleaned_data <- bind_rows(CBdata.1_10) %>%
+  filter(!is.na(Age)) %>%
+  select(-"PiS/TiS")
+
+filtered_data <- subset(cleaned_data, Year == "1976")
+rownames(filtered_data) <- c(1:481)
+rownames(dat.76.clean) <- c(1:481)
+colnames(dat.76.clean) <- colnames(filtered_data)
+
+identical(filtered_data, dat.76.clean)
 
 ```
 
@@ -72,7 +85,7 @@ The `IPS_sampledata` data set contains a fraction of the indoor positioning syst
 
 ```{r eval=T, echo=T}
 # loads data set IPS_sampledata
-load("IPS_portion.RData")
+# load("IPS_portion.RData")
 ```
 
 ### Variable dictionary
