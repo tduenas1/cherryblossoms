@@ -37,7 +37,7 @@ dat.76 <- dat.76 %>% select(-"PiS.TiS")
 
 ```{r summary}
 # find mean and median recorded ages with summarise()
-dat.76 %>% summarise(mean = mean(Age, na.rm = T), median = median(Age, na.rm = T)) 
+dat.76 %>% summarise(mean = mean(Age), median = median(Age)) 
 ```
 
 
