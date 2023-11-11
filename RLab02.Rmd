@@ -104,7 +104,7 @@ mean_age_78_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
 identical(first.five.average[1,1], mean_age_73_77)
 identical(other.five.average[1,1], mean_age_78_82)
 ```
-
+The mean outcome from lab 1 and lab 2 come out as the same. 
 
 6) Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
 a) use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements. 
