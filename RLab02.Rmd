@@ -110,18 +110,17 @@ identical(other.five.average[1,1], mean_age_78_82)
 The mean outcome from lab 1 and lab 2 come out as the same. 
 
 
-
-
 6) Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
 a) use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements. 
 ```{r weather_read}
 library(readr)
 
+# reading the weather.csv file from the git repository
 file_url <- "https://raw.githubusercontent.com/tduenas1/cherryblossoms/main/weatherdat.csv"
 weather <- read_csv(file_url)
 ```
 ```{r}
-
+# retrieves problems while parsing weatherdata.csv
 problems(weather)
 # all of the problems from the warning are related to cols we are not using
 # DATE col is a date
@@ -132,7 +131,7 @@ b) Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of t
 c) Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
 
 ```{r date_join}
-
+# storing the dates of first 10 races
 date_list <- data.frame(Year = c(1973, 1974, 1975, 1976, 1977,
                                  1978, 1979, 1980, 1981, 1982),
                    DATE = as.Date(c("1973-04-01", "1974-03-31",
@@ -141,6 +140,7 @@ date_list <- data.frame(Year = c(1973, 1974, 1975, 1976, 1977,
                                     "1979-04-01", "1980-03-30",
                                     "1981-04-05", "1982-04-04")))
 
+# using 'full_join' to add date column to the cherry blossom data
 if (!("DATE" %in% colnames(cleaned_data))) {
   cleaned_data_date <- full_join(cleaned_data, date_list, by = "Year")
 }
@@ -151,6 +151,7 @@ d) Use a `join` function to add precipitation `PRCP`  and minimum daily temperat
 
 ```{R weather_join}
 
+# using 'left_join' to add precipitation & minimum temperature to the cherry blossom data
 if (!("DATE" %in% colnames(cleaned_data_date) & "PRCP" %in% colnames(cleaned_data_date))) {
   cb_weather <- cleaned_data_date %>%
   left_join(weather %>% select(DATE, PRCP, TMIN), by = "DATE")
@@ -162,5 +163,6 @@ if (!("DATE" %in% colnames(cleaned_data_date) & "PRCP" %in% colnames(cleaned_dat
 check join results:
 
 ```{r}
+# printing the first 6 columns to check join results
 print(head(cb_weather))
 ```
