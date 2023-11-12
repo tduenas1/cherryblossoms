@@ -75,6 +75,7 @@ a) Calculate the average of the recorded ages in 1976 and that same average over
 b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. Compute the average participant age over the first five years and the average age over years 6-10, and make sure these numbers match the ones you found in Lab 1.  
 
 ```{r}
+# calculate mean ages
 dat.76.clean %>% summarise(mean = mean(Age)) -> dat.76.average
 cleaned_data %>% summarise(mean = mean(Age, na.rm = T)) ->all.average
 
@@ -82,13 +83,15 @@ cleaned_data %>% summarise(mean = mean(Age, na.rm = T)) ->all.average
 mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976]) 
 mean_age_all <- mean(CBdata.1_10.clean$Age)
 
-
+# check for identical means from lab1 and lab2
 identical(dat.76.average[1,1], mean_age_1976)
 identical(all.average[1,1], mean_age_all)
 
+# filter data into first 5 and second 5 years using piping
 cleaned_data %>% filter(Race <= 1978) -> first.five
 cleaned_data %>% filter(Race >= 1978) -> other.five
 
+# calculate mean ages
 first.five %>% summarise(mean = mean(Age)) -> first.five.average
 other.five %>% summarise(mean = mean(Age)) ->other.five.average
 
@@ -100,66 +103,64 @@ mean_age_73_77 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
 mean_age_78_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year 
                                              %in% 1978:1982]) 
 
-
+# checks for identical results from lab1 and lab2
 identical(first.five.average[1,1], mean_age_73_77)
 identical(other.five.average[1,1], mean_age_78_82)
 ```
 The mean outcome from lab 1 and lab 2 come out as the same. 
 
+
+
+
 6) Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
 a) use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements. 
-b) Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of the first 10 races. Store this information in a vector or data frame.
-c) Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
-d) Use a `join` function to add precipitation `PRCP`  and minimum daily temperature `TMIN` columns to your cherry blossom data set.
+```{r weather_read}
+library(readr)
 
-# Playing with the indoor positioning system data
+file_url <- "https://raw.githubusercontent.com/tduenas1/cherryblossoms/main/weatherdat.csv"
+weather <- read_csv(file_url)
+```
+```{r}
 
-The `IPS_sampledata` data set contains a fraction of the indoor positioning system data for 15 randomly sampled locations.This data set is loaded into memory using the chunk of R code below, complete the following exercises. 
-
-```{r eval=T, echo=T}
-# loads data set IPS_sampledata
-# load("IPS_portion.RData")
+problems(weather)
+# all of the problems from the warning are related to cols we are not using
+# DATE col is a date
+# PRCP and TMIN are dbl
 ```
 
-### Variable dictionary
+b) Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of the first 10 races. Store this information in a vector or data frame.
+c) Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
 
-- `time`: timestamp in milliseconds since midnight 01/01/1970 UTC
+```{r date_join}
 
-- `scanMac`: MAC address of the scanning device (this is a handheld device)
+date_list <- data.frame(Year = c(1973, 1974, 1975, 1976, 1977,
+                                 1978, 1979, 1980, 1981, 1982),
+                   DATE = as.Date(c("1973-04-01", "1974-03-31",
+                                    "1975-04-06", "1976-04-04",
+                                    "1977-04-03", "1978-04-02",
+                                    "1979-04-01", "1980-03-30",
+                                    "1981-04-05", "1982-04-04")))
 
-- `posX`, `posY` and `posZ`: the (x, y, z) physical coordinate of the scanning device
+if (!("DATE" %in% colnames(cleaned_data))) {
+  cleaned_data_date <- full_join(cleaned_data, date_list, by = "Year")
+}
 
-- `orientation`: degree orientation of the user carrying the scanning device in degrees
+```
 
-- `mac`: MAC address of an access point
+d) Use a `join` function to add precipitation `PRCP`  and minimum daily temperature `TMIN` columns to your cherry blossom data set.
 
-- `signal`: signal strength in dBm (Decibel-milliwatts)
+```{R weather_join}
 
-- `channel`: the channel frequency
+if (!("DATE" %in% colnames(cleaned_data_date) & "PRCP" %in% colnames(cleaned_data_date))) {
+  cb_weather <- cleaned_data_date %>%
+  left_join(weather %>% select(DATE, PRCP, TMIN), by = "DATE")
+}
 
-- `type`: type of device (access point = 3, device in adhoc mode = 1)
-
-### Let's clean up the data a bit
-
-1. Apply the same `class` conversions you did last week to get these variables into the correct class type. Use `dplyr` functions and piping to complete this operation (there are many ways to do so). If you'd like to `mutate` multiple columns at once, the `across()` function might be useful!
-
-2. Because we only want data relative to access points, remove observations that correspond to any other type of device using `dplyr` functions.
-
-3. Last week you identified variables that provide redundant or no information. Remove them from the data frame using `dplyr` functions. 
-
-4. Note that the `time` variable is in milliseconds.  Use `dplyr` to transform it into seconds and then convert its class into a time format using the function `as.POSIXct`.
-
-5. Convert this data set to a more wide format by creating one column for each access point, with each of those columns containing the corresponding signal strengths. Hint: you should end up with a data frame that has a lot fewer rows!  
-Set this data set aside and use the long format data for the rest of the assignment
+```
 
 
-### Examining the data more closely
+check join results:
 
-1. Using grouping and `dplyr` functions, tally the  number of observations for all access points in the data. 
-
-2. While the researchers did their best to clean their data, some noise was introduced by access points on other floors.  Based on the number of counts, identify and remove likely suspects for access points read by mistake, again using `dplyr` functions.
-
-3.  The orientation of the hand-held device considered was supposed to be exactly set to the 8 angles from 0-315 in increments of 45 degrees (360 is equivalent to 0). However, in practice the measured orientations were close to the 8 expected but had some error.  Use the `case_when` function to recode the orientation values as one of 0, 45, 90, 135, 180, 225, 270, 315. Call the recoded orientation variable `rec_orient`.
-
-4. Last week you created the function `signal_summary` that takes as inputs a location (`posX`, `posY`, `posZ`), an orientation (`rec_orient`) and an access point id (`mac`).  The function identified and subset the rows in `IPS_sampledata` corresponding to this unique combination, then calculated and returned the mean and standard deviation for the corresponding signal strengths. You then used `lapply` to compute mean and standard deviation values for all combinations of location, orientation, and access point ID. 
-Use piping,`summarise()`, and other `dplyr` functions to run this same computation without the use of loops or `lapply`. Compare your results with those from last week to confirm you're doing the right thing!
+```{r}
+print(head(cb_weather))
+```
