@@ -1,0 +1,42 @@
+---
+title: "R Coding Lab Part 3: CB"
+output: rmdformats::downcute
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
+
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful! **
+
+**ALSO, all plots generated should have labeled axes, titles, and legends when appropriate. Don't forget units of measurement! Make sure these plots could be interpreted by your client.**
+
+
+```{r import_data,eval=F, echo=F}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
+
+
+```
+# Cherry Blossom Race Plotting Problems
+
+1) Looking at race times all on their own.
+    a) Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrage all ten of these plots into one figure 
+    b) Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
+  
+2) Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
+
+Write a short interpretation of the plot as if you were explaining it to your client.
+  
+  
+3) Relating age and times categorically:  
+We're interested in the age composition for ten performance groups. The performance groups are defined based ten percentiles (10%, 20%,...100%) of relative finish position. For example, someone finishing 3rd out of 125 would be in the 10th-percentile group, while someone finishing 985 out of 1013 would be in the 100th-percentile group.  
+The age groups we're interested in are defined by decade, so separate people in their 20's from people in their 30's and so forth.  
+Generate one plot that displays the age composition of each of the ten performance groups. Make sure you're using all ten year's worth of data.  
+Hint: You can compute performance groups manually from `Year` and `Time`, or by carefully manipulating `Pis/Tis`.
+
+
