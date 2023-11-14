@@ -18,14 +18,74 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
-load("CBdata.1_10.RData") #Loading the cherry blossom data. (this is an example of a properly commented line of code)
-
+library(chron)
 
 ```
 # Cherry Blossom Race Plotting Problems
 
 1) Looking at race times all on their own.
     a) Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrage all ten of these plots into one figure 
+
+    
+I am modifying cleaned_data from lab2
+```{r 1_a_clean}
+
+cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
+
+cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
+
+cleaned_data <- cleaned_data[cleaned_data$Time != '', , drop = FALSE]
+
+cleaned_data$Time <- chron::times(cleaned_data$Time)
+
+```
+
+
+```{r summary_check}
+summary_by_year <- cleaned_data %>%
+  group_by(Year) %>%
+  summarize(
+    mean_Time = mean(Time),
+    min_Time = min(Time),
+    max_Time = max(Time),
+    participants = n()
+  )
+
+print(summary_by_year)
+```
+
+
+```{r 1_a_plot}
+plot_histogram_density <- function(plot_year, cleaned_data) {
+  
+  subset_data <- cleaned_data[cleaned_data$Year == plot_year, ]
+  
+  hist_data <- hist(subset_data$Time, breaks = 10, plot = FALSE)
+  
+  plot(hist_data, col = "lightblue",
+       main = paste("", plot_year),
+       xlab = "Time (hr:min)",
+       ylab = "",
+       freq = FALSE, xaxt = "n")
+  
+  axis(1, at = hist_data$breaks,
+       labels = chron(times = hist_data$breaks, format = "h:mm"),
+       las = 2)
+  
+  lines(density(subset_data$Time), col = "blue", lwd = 2)
+}
+
+par(mfrow = c(2, 5))
+
+for (year in 1973:1982) {
+  plot_histogram_density(year, cleaned_data)
+}
+
+```
+There were only two participants in 1973 with age and time recorded.
+
+
+
     b) Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
   
 2) Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
