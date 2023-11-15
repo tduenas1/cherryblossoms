@@ -24,26 +24,36 @@ library(chron)
 # Cherry Blossom Race Plotting Problems
 
 1)  Looking at race times all on their own.
-    a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrage all ten of these plots into one figure
+    a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrange all ten of these plots into one figure
 
 I am modifying cleaned_data from lab2
 
+
 ```{r 1_a_clean}
 # load cherry blossom data
+
 load("CBdata.1_10.RData")
 
 cleaned_data <- bind_rows(CBdata.1_10) %>%
   filter(!is.na(Age)) %>%
-  select(-"PiS/TiS")
+  filter(!is.na(Time) & Time != "") %>%
+  select(-'PiS/TiS')
 
-cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
+print(cleaned_data[c(137, 180, 5404), ])
+```
+
+
+```{r}
 
 cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
+
+cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 
 cleaned_data <- cleaned_data[cleaned_data$Time != '', , drop = FALSE]
 
 cleaned_data$Time <- chron::times(cleaned_data$Time)
 
+cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 ```
 
 ```{r summary_check}
