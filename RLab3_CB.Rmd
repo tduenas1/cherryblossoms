@@ -58,7 +58,6 @@ cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 
 ```{r summary_check}
 
-#Create a summary of the mean, minimum, max and number of participants
 summary_by_year <- cleaned_data %>%
   group_by(Year) %>%
   summarize(
