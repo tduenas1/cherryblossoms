@@ -71,7 +71,7 @@ print(summary_by_year)
 ```
 
 ```{r 1_a_plot}
-# create a function to plot the histogram of a certain year
+
 plot_histogram_density <- function(plot_year, cleaned_data) {
   
   subset_data <- cleaned_data[cleaned_data$Year == plot_year, ]
@@ -81,7 +81,7 @@ plot_histogram_density <- function(plot_year, cleaned_data) {
   plot(hist_data, col = "lightblue",
        main = paste("", plot_year),
        xlab = "Time (hr:min)",
-       ylab = "",
+       ylab = "Density",
        freq = FALSE, xaxt = "n")
   
   axis(1, at = hist_data$breaks,
@@ -91,21 +91,21 @@ plot_histogram_density <- function(plot_year, cleaned_data) {
   lines(density(subset_data$Time), col = "blue", lwd = 2)
 }
 
-
 par(mfrow = c(2, 5))
 
-#loops through the years 
 for (year in 1973:1982) {
   plot_histogram_density(year, cleaned_data)
 }
 
 ```
-
 There were only two participants in 1973 with age and time recorded.
 
-```         
+
+        
 b) Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
-```
+
+
+
 
 ```{r}
 scat_plot = function(curr_year,cleaned_data)
