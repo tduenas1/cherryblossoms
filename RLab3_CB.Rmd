@@ -18,6 +18,8 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(chron)
+library(plotly)
+library(purrr)
 
 ```
 
@@ -27,7 +29,6 @@ library(chron)
     a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrange all ten of these plots into one figure
 
 I am modifying cleaned_data from lab2
-
 
 ```{r 1_a_clean}
 # load cherry blossom data
@@ -42,8 +43,7 @@ cleaned_data <- bind_rows(CBdata.1_10) %>%
 print(cleaned_data[c(137, 180, 5404), ])
 ```
 
-
-```{r}
+```{r, message = F}
 
 cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
 
@@ -104,6 +104,51 @@ b) Plot the density curves for all ten years in one figure, along with a density
 ```
 
 ```{r}
+
+density_data <- density(cleaned_data$Time)
+
+
+years <- unique(cleaned_data$Year)
+
+
+line_colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple", 
+                 "blue", "cornflowerblue", "darkgreen", "lightgreen")
+
+
+custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+tick_positions <- seq(min(density_data$x), max(density_data$x), 
+                      length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+
+p <- plot_ly() %>%
+  add_trace(type = "scatter",
+            mode = "lines",
+            x = density_data$x,
+            y = density_data$y,
+            line = list(color = "black", width = 5),
+            name = "All Years") %>%
+  layout(title = "Density Curve by Year",
+         xaxis = list(title = "Time (hr:min)", showline = TRUE, 
+                      tickvals = tick_positions, ticktext = custom_ticks),
+         yaxis = list(title = "Density", showline = TRUE),
+         showlegend = TRUE)
+
+
+for (i in seq_along(years)) {
+  year <- years[i]
+  subset_data <- cleaned_data[cleaned_data$Year == year, ]
+  p <- add_trace(p,
+                 type = "scatter",
+                 mode = "lines",
+                 x = density(subset_data$Time)$x,
+                 y = density(subset_data$Time)$y,
+                 line = list(color = line_colors[i], width = 3, 
+                             dash = ifelse(year %% 2 == 0, "solid", "dash")),
+                 name = as.character(year))
+}
+
+p
 
 ```
 
