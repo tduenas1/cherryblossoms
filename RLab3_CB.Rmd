@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 **ALSO, all plots generated should have labeled axes, titles, and legends when appropriate. Don't forget units of measurement! Make sure these plots could be interpreted by your client.**
 
 ```{r import_data, message = F}
+
+# load packages
 library(dplyr)
 library(ggplot2)
 library(lubridate)
@@ -25,6 +27,8 @@ library(purrr)
 
 # Cherry Blossom Race Plotting Problems
 
+# Question 1
+
 1)  Looking at race times all on their own.
     a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrange all ten of these plots into one figure
 
@@ -32,32 +36,38 @@ I am modifying cleaned_data from lab2
 
 ```{r 1_a_clean}
 # load cherry blossom data
-
 load("CBdata.1_10.RData")
 
+# create one df and remove 'Pis/Tis' column and NAs from 'Age' and 'Time'
 cleaned_data <- bind_rows(CBdata.1_10) %>%
   filter(!is.na(Age)) %>%
   filter(!is.na(Time) & Time != "") %>%
   select(-'PiS/TiS')
 
+# print out random observations to check
 print(cleaned_data[c(137, 180, 5404), ])
 ```
 
 ```{r, message = F}
-
+# Remove any none-numeric and non-column characters from 'Time'
 cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
 
+# Remove NA's from 'Time' 
 cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 
+# Remove empty strings from 'Time'
 cleaned_data <- cleaned_data[cleaned_data$Time != '', , drop = FALSE]
 
+# Converts 'Time' column to a time format
 cleaned_data$Time <- chron::times(cleaned_data$Time)
 
+# Removes any potential NA's generated from the conversion above
 cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 ```
 
 ```{r summary_check}
 
+# calculate the mean, min, max per 'Year' for 'Time'
 summary_by_year <- cleaned_data %>%
   group_by(Year) %>%
   summarize(
@@ -67,32 +77,41 @@ summary_by_year <- cleaned_data %>%
     participants = n()
   )
 
+# print out summary generated above to have an idea of our data distribution
 print(summary_by_year)
 ```
 
 ```{r 1_a_plot}
 
+# Creates function that creates histogram and density plot pairs for dif years
+# Takes in 2 arguments: 'plot_year' and 'cleaned_data'
 plot_histogram_density <- function(plot_year, cleaned_data) {
   
+  # pulls out data from 'cleaned_data' based on 'plot_year'
   subset_data <- cleaned_data[cleaned_data$Year == plot_year, ]
   
+  # makes histogram of data without plotting it
   hist_data <- hist(subset_data$Time, breaks = 10, plot = FALSE)
   
+  # plots above generated histogram with color and labels
   plot(hist_data, col = "lightblue",
        main = paste("", plot_year),
        xlab = "Time (hr:min)",
        ylab = "Density",
        freq = FALSE, xaxt = "n")
-  
+  # custom x-axis with labels as hours and minutes
   axis(1, at = hist_data$breaks,
        labels = chron(times = hist_data$breaks, format = "h:mm"),
        las = 2)
-  
+  # adds density plot line in blue over histogram
   lines(density(subset_data$Time), col = "blue", lwd = 2)
 }
 
+# creates 2x5 martix layout for plots
 par(mfrow = c(2, 5))
 
+# loops over years 1973:1982 and calls function above to 
+# generate histogram and density plot
 for (year in 1973:1982) {
   plot_histogram_density(year, cleaned_data)
 }
@@ -111,8 +130,8 @@ density_data <- density(cleaned_data$Time)
 years <- unique(cleaned_data$Year)
 
 
-line_colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple", 
-                 "blue", "cornflowerblue", "darkgreen", "lightgreen")
+line_colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", 
+                 "purple", "blue", "cornflowerblue", "darkgreen", "lightgreen")
 
 
 custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
@@ -152,6 +171,10 @@ p
 
 ```
 
+**The above plot is interactive. Click the lines in the legend to remove or add a line.**
+
+# Question 2
+
 2)  Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
 
 ```{r}
@@ -180,6 +203,8 @@ for (curr_year in 1973:1982)
 Write a short interpretation of the plot as if you were explaining it to your client.
 
 **Looking at the red line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.**
+
+# Question 3
 
 3)  Relating age and times categorically:\
     We're interested in the age composition for ten performance groups. The performance groups are defined based ten percentiles (10%, 20%,...100%) of relative finish position. For example, someone finishing 3rd out of 125 would be in the 10th-percentile group, while someone finishing 985 out of 1013 would be in the 100th-percentile group.\
