@@ -1,21 +1,25 @@
 ---
-title: "R Coding Lab Part 2"
-output: rmdformats::html_docco
+title: "Lab 2"
+output: rmdformats::material
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# 3DS : Cherry Blossom
+
+## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+
 **Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
 
-**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful! **
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful!**
 
+# Question 1
 
-# Playing With Cherry Blossom Race Data
+## Playing With Cherry Blossom Race Data
 
-1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis` using a `dplyr` function. 
-
+1)  First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis` using a `dplyr` function.
 
 ```{r import_data, message = F}
 # load dplyr package
@@ -32,17 +36,18 @@ dat.76 <- dat.76 %>% select(-"PiS.TiS")
 
 ```
 
+# Question 2
 
-2) Use the `summarise()` function to find the mean and median recorded ages in 1976. 
+2)  Use the `summarise()` function to find the mean and median recorded ages in 1976.
 
 ```{r summary}
 # find mean and median recorded ages with summarise()
 dat.76 %>% summarise(mean = mean(Age), median = median(Age)) 
 ```
 
+# Question 3
 
-3) You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to use `dplyr` to remove the data with missing age. This should not be a loop!  
-
+3)  You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to use `dplyr` to remove the data with missing age. This should not be a loop!
 
 ```{r remove_missing_age}
 # remove data with missing age
@@ -50,9 +55,10 @@ dat.76.clean <- dat.76 %>%
   filter(!is.na(Age))
 ```
 
+# Question 4
 
-4) Last week you wrote a loop to combine all of the data from `CBdata.1_10` into one cleaned data frame. Use the function `bind_rows()` from `dplyr` to accomplish this same task. use the `?` command to look up documentation on functions you're not familar with like this: `?bind_rows`. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.  
-Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`. 
+4)  Last week you wrote a loop to combine all of the data from `CBdata.1_10` into one cleaned data frame. Use the function `bind_rows()` from `dplyr` to accomplish this same task. use the `?` command to look up documentation on functions you're not familar with like this: `?bind_rows`. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.\
+    Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`.
 
 ```{r combine_dat}
 # combine all data frames from list into one data frame
@@ -70,14 +76,35 @@ identical(filtered_data, dat.76.clean)
 
 ```
 
-5) Now that you have the combined data set for these 10 years, let's compare some basic results to what you found last week. Use piping and `dplyr` functions in your computations.  
-a) Calculate the average of the recorded ages in 1976 and that same average over the entire `CBdata.1_10` data set, and make sure these numbers match the ones you found in Lab 1.  
-b) Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. Compute the average participant age over the first five years and the average age over years 6-10, and make sure these numbers match the ones you found in Lab 1.  
+# Question 5
+
+5)  Now that you have the combined data set for these 10 years, let's compare some basic results to what you found last week. Use piping and `dplyr` functions in your computations.\
+
+<!-- -->
+
+a)  Calculate the average of the recorded ages in 1976 and that same average over the entire `CBdata.1_10` data set, and make sure these numbers match the ones you found in Lab 1.\
+b)  Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. Compute the average participant age over the first five years and the average age over years 6-10, and make sure these numbers match the ones you found in Lab 1.
 
 ```{r}
+# CBdata.1_10.clean from Lab 1 to compare
+# creates an empty dataframe to store the cleaned data
+CBdata.1_10.clean <- data.frame()
+
+# loops through the df and gives cleaned df
+for (i in 1:length(CBdata.1_10)) {
+
+  current_df <- CBdata.1_10[[i]] # selects a df in the df
+  current_df <- current_df[, -6] # removes Pis/Tis column
+  
+  # selects rows without NA age
+  current_df <- current_df[!is.na(current_df$Age), ] 
+  # binds the cleaned out df into a large df
+  CBdata.1_10.clean <- rbind(CBdata.1_10.clean, current_df) 
+}
+
 # calculate mean ages
 dat.76.clean %>% summarise(mean = mean(Age)) -> dat.76.average
-cleaned_data %>% summarise(mean = mean(Age, na.rm = T)) ->all.average
+cleaned_data %>% summarise(mean = mean(Age, na.rm = T)) -> all.average
 
 #Lab 1 test
 mean_age_1976 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year == 1976]) 
@@ -107,11 +134,17 @@ mean_age_78_82 <- mean(CBdata.1_10.clean$Age[CBdata.1_10.clean$Year
 identical(first.five.average[1,1], mean_age_73_77)
 identical(other.five.average[1,1], mean_age_78_82)
 ```
-The mean outcome from lab 1 and lab 2 come out as the same. 
 
+The mean outcome from lab 1 and lab 2 come out as the same.
 
-6) Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
-a) use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements. 
+# Question 6
+
+6)  Let's now incorporate weather data into our cherry blossom data set. We will be dealing with multiple data sources, so this is a perfect oppritunity to practice `join` skills...
+
+<!-- -->
+
+a)  use `readr()` to import the `weatherdat.csv` data. This is raw data recorded by a weather station in the Washington DC area. This particular data set contains daily summaries of various weather measurements.
+
 ```{r weather_read}
 library(readr)
 
@@ -119,6 +152,7 @@ library(readr)
 file_url <- "https://raw.githubusercontent.com/tduenas1/cherryblossoms/main/weatherdat.csv"
 weather <- read_csv(file_url)
 ```
+
 ```{r}
 # retrieves problems while parsing weatherdata.csv
 problems(weather)
@@ -127,8 +161,8 @@ problems(weather)
 # PRCP and TMIN are dbl
 ```
 
-b) Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of the first 10 races. Store this information in a vector or data frame.
-c) Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
+b)  Open the `Rite_of_Spring_1973_2020-1.pdf` document, and record the dates of the first 10 races. Store this information in a vector or data frame.
+c)  Use a `join` function to add a date column to your cherry blossom data frame. Hints: (i) the `paste()` and `paste0` functions are useful for creating charecter vectors (ii) it would be useful for these dates to have the same format as those found in the weather data set...
 
 ```{r date_join}
 # storing the dates of first 10 races
@@ -147,7 +181,7 @@ if (!("DATE" %in% colnames(cleaned_data))) {
 
 ```
 
-d) Use a `join` function to add precipitation `PRCP`  and minimum daily temperature `TMIN` columns to your cherry blossom data set.
+d)  Use a `join` function to add precipitation `PRCP` and minimum daily temperature `TMIN` columns to your cherry blossom data set.
 
 ```{R weather_join}
 
@@ -158,7 +192,6 @@ if (!("DATE" %in% colnames(cleaned_data_date) & "PRCP" %in% colnames(cleaned_dat
 }
 
 ```
-
 
 check join results:
 
