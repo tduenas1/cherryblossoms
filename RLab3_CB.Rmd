@@ -98,36 +98,12 @@ for (year in 1973:1982) {
 }
 
 ```
+
 There were only two participants in 1973 with age and time recorded.
 
-
-        
-b) Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
-
-
-
+b)  Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
 
 ```{r}
-scat_plot = function(curr_year,cleaned_data)
-{
-
-  sub_data = cleaned_data %>% filter(Year == curr_year)
-  plot(sub_data$Age ~ sub_data$Time,
-       main = curr_year,
-       xlab = "Time",
-       ylab = "Age")
-  
-  abline(lm(sub_data$Age ~ sub_data$Time), col="red")
-
-}
-
-par(mfrow = c(2, 5))
-
-for (curr_year in 1973:1982)
-{
-
-  scat_plot(curr_year, cleaned_data)
-}
 
 density_data <- density(cleaned_data$Time)
 
@@ -177,6 +153,29 @@ p
 ```
 
 2)  Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
+
+```{r}
+scat_plot = function(curr_year,cleaned_data)
+{
+
+  sub_data = cleaned_data %>% filter(Year == curr_year)
+  plot(sub_data$Age ~ sub_data$Time,
+       main = curr_year,
+       xlab = "Time",
+       ylab = "Age")
+  
+  abline(lm(sub_data$Age ~ sub_data$Time), col="red")
+
+}
+
+par(mfrow = c(2, 5))
+
+for (curr_year in 1973:1982)
+{
+
+  scat_plot(curr_year, cleaned_data)
+}
+```
 
 Write a short interpretation of the plot as if you were explaining it to your client.
 
