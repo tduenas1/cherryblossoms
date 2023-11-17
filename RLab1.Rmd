@@ -1,6 +1,6 @@
 ---
 title: "R Coding Lab Part 1"
-output: rmdformats::html_docco
+output: rmdformats::material
 ---
 
 ```{r setup, include=FALSE}
@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # 3DS : Cherry Blossom
+
 ## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
 
 **Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
@@ -16,9 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Use only tools covered in our lectures**.
 
-# Playing With Cherry Blossom Race Data
+# Question 1 
 
-1)  First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`.
+### Playing With Cherry Blossom Race Data
+
+1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`.
 
 ```{r import_data, results = F}
 # load cherry blossom data
@@ -34,6 +37,8 @@ dat.76
 
 ```
 
+# Question 2
+
 2)  The function `summary()` is useful for learning basic facts about vectors, data frames, and many other R objects. Use this function to find the mean and median recorded ages in 1976.
 
 ```{r summary}
@@ -43,6 +48,8 @@ summary(dat.76)
 ```
 
 **The mean recorded age for 1976 is 32.09. The median recorded age for 1976 is 32.**
+
+# Question 3
 
 3)  You might have noticed that a number of age values are missing (i.e. `NA`). Your next goal is to write a loop that removes observations that don't have age data.\
     Hints:\
@@ -72,6 +79,8 @@ for (i in 2:dim(dat.76)[1])
 
 ```
 
+# Question 4
+
 4)  Now use vectorization and the `is.na()` function to accomplish the same thing as the loop above.\
     How to check your work: If your loop produced a data frame called "dat.76.clean" and the vectorization approach produced a data frame called `dat.76.clean2`, the `identical(dat.76.clean,dat.76.clean2)` should return `TRUE`.
 
@@ -83,6 +92,8 @@ dat.76.clean2 <- dat.76[!is.na(dat.76$Age),]
 identical(dat.76.clean,dat.76.clean2)
 
 ```
+
+# Question 5
 
 5)  Filtering out missing age data could be useful when dealing with other years. With this in mind, turn your filter loop or vectorization approach into a function. You should be able to use the function like this: `dat.76.clean <- filter.func(dat.76)`.\
     When you have a function written, run it on the 1976 data and use identical() to verify that your function and the first loop you wrote are doing the same thing.
@@ -120,6 +131,8 @@ identical(dat.76.clean, dat.76.clean3)
 
 ```
 
+# Question 6
+
 6)  Next, write a loop that combines all of the data from `CBdata.1_10` into one cleaned data frame. Make sure your final data frame has neither the `Pis/Tis` column nor `NA` Age values.\
     Use the `identical()` function to verify that the 1976 data in this larger cleaned data set is the same as the cleaned version of `dat.76`.
 
@@ -150,11 +163,15 @@ identical(dat.76.clean, filtered_df)
 
 ```
 
+# Question 7
+
 7)  Now that you have the combined data set for these 10 years, let's do some basic exploration:
 
+```{=html}
+<!-- -->
+```
 a)  How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?\
 b)  Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
-
 
 ```{r explore_dat_7a}
 # finds mean age of year 1976
@@ -176,9 +193,10 @@ print(paste("mean age of first 10 years:", round(mean_age_all, 2)))
 print("T-test result:")
 print(t_test_result)
 ```
+
 To compare the mean age from 1976 to the mean age of the entire dataset (1973 to 1982), we ran one sample t-test (two-tailed). The null hypothesis (H0) posited that there is no significant difference in mean ages between the sample (1976) and the population mean (1973 to 1982), while the alternative hypothesis (H1) suggested the presence of a significant difference.
 
-The analysis yielded a statistically significant result, with the p-value of .02244 falling below the chosen alpha level (0.05). Consequently, we reject the null hypothesis, providing strong evidence that a significant difference exists between the sample mean age, and the population mean age. 
+The analysis yielded a statistically significant result, with the p-value of .02244 falling below the chosen alpha level (0.05). Consequently, we reject the null hypothesis, providing strong evidence that a significant difference exists between the sample mean age, and the population mean age.
 
 ```{r explore_dat_7b}
 # mean of years from 1973 to 1977
@@ -202,6 +220,7 @@ print(paste("mean age of the next 5 years:", round(mean_age_78_82, 2)))
 print("T-test result:")
 print(t_test_result)
 ```
+
 To compare the mean age from the first five years (1973-1977) to the mean age of the next five years (1978 to 1982) we ran a two sample t-test (two-tailed). The null hypothesis (H0) posited that there is no significant difference in mean ages between the two groups, while the alternative hypothesis (H1) suggested the presence of a significant difference.
 
 The analysis yielded a statistically significant result, with the p-value of 2.2e-16 falling below the chosen alpha level (0.05). Consequently, we reject the null hypothesis, providing strong evidence that a significant difference exists in the mean ages of the two groups.
