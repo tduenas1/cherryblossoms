@@ -179,7 +179,7 @@ for (curr_year in 1973:1982)
 
 Write a short interpretation of the plot as if you were explaining it to your client.
 
-Looking at the red line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.
+**Looking at the red line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.**
 
 3)  Relating age and times categorically:\
     We're interested in the age composition for ten performance groups. The performance groups are defined based ten percentiles (10%, 20%,...100%) of relative finish position. For example, someone finishing 3rd out of 125 would be in the 10th-percentile group, while someone finishing 985 out of 1013 would be in the 100th-percentile group.\
