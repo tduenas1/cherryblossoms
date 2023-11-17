@@ -57,6 +57,7 @@ cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 ```
 
 ```{r summary_check}
+
 summary_by_year <- cleaned_data %>%
   group_by(Year) %>%
   summarize(
@@ -70,6 +71,7 @@ print(summary_by_year)
 ```
 
 ```{r 1_a_plot}
+
 plot_histogram_density <- function(plot_year, cleaned_data) {
   
   subset_data <- cleaned_data[cleaned_data$Year == plot_year, ]
@@ -79,7 +81,7 @@ plot_histogram_density <- function(plot_year, cleaned_data) {
   plot(hist_data, col = "lightblue",
        main = paste("", plot_year),
        xlab = "Time (hr:min)",
-       ylab = "",
+       ylab = "Density",
        freq = FALSE, xaxt = "n")
   
   axis(1, at = hist_data$breaks,
@@ -96,14 +98,36 @@ for (year in 1973:1982) {
 }
 
 ```
-
 There were only two participants in 1973 with age and time recorded.
 
-```         
+
+        
 b) Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
-```
+
+
+
 
 ```{r}
+scat_plot = function(curr_year,cleaned_data)
+{
+
+  sub_data = cleaned_data %>% filter(Year == curr_year)
+  plot(sub_data$Age ~ sub_data$Time,
+       main = curr_year,
+       xlab = "Time",
+       ylab = "Age")
+  
+  abline(lm(sub_data$Age ~ sub_data$Time), col="red")
+
+}
+
+par(mfrow = c(2, 5))
+
+for (curr_year in 1973:1982)
+{
+
+  scat_plot(curr_year, cleaned_data)
+}
 
 density_data <- density(cleaned_data$Time)
 
@@ -155,6 +179,8 @@ p
 2)  Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
 
 Write a short interpretation of the plot as if you were explaining it to your client.
+
+Looking at the red line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.
 
 3)  Relating age and times categorically:\
     We're interested in the age composition for ten performance groups. The performance groups are defined based ten percentiles (10%, 20%,...100%) of relative finish position. For example, someone finishing 3rd out of 125 would be in the 10th-percentile group, while someone finishing 985 out of 1013 would be in the 100th-percentile group.\
