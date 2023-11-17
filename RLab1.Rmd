@@ -1,5 +1,5 @@
 ---
-title: "R Coding Lab Part 1"
+title: "Lab 1"
 output: rmdformats::material
 ---
 
@@ -17,11 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Use only tools covered in our lectures**.
 
-# Question 1 
+# Question 1
 
 ### Playing With Cherry Blossom Race Data
 
-1) First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`.
+1)  First load the data, which is saved as a .RData file called `CBdata.1_10.RData`. This is the first ten years' worth of Cherry Blossom Race data. Pull out the data associated with 1976 and store it as a data frame called `dat.76`. Remove the column `Pis/Tis`.
 
 ```{r import_data, results = F}
 # load cherry blossom data
@@ -167,9 +167,8 @@ identical(dat.76.clean, filtered_df)
 
 7)  Now that you have the combined data set for these 10 years, let's do some basic exploration:
 
-```{=html}
 <!-- -->
-```
+
 a)  How does the average of the recorded ages in 1976 compare to that same average over the entire `CBdata.1_10` data set?\
 b)  Recall that the `CBdata.1_10` contains the first ten year's worth of cherry blossom race data. How does the average participant age over the first five years compare to the average age over years 6-10?
 
