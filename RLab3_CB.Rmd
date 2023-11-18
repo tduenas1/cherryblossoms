@@ -37,7 +37,6 @@ library(RColorBrewer)
 1)  Looking at race times all on their own.
     a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrange all ten of these plots into one figure
 
-I am modifying cleaned_data from lab2
 
 ```{r 1_a_clean}
 # load cherry blossom data
