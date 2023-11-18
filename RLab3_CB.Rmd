@@ -181,22 +181,38 @@ p
 2)  Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
 
 ```{r}
+
+#colors for graph
+colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple",
+            "blue", "cornflowerblue", "darkgreen", "lightgreen")
+
+#creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and it's trend line
 scat_plot = function(curr_year,cleaned_data)
 {
 
+  #subsetting data by given year
   sub_data = cleaned_data %>% filter(Year == curr_year)
+  
+  #scatterplot of age vs time 
   plot(sub_data$Time ~ sub_data$Age,
        main = curr_year,
-       xlab = "Age",
-       ylab = "Time")
-  
-  abline(lm(sub_data$Time ~ sub_data$Age), col="red")
+       xlab = "Age (years)",
+       ylab = "Time (hh:mm)",
+       xlim = c(0,80),
+       col = colors[curr_year - 1972]
+       )
+  # plots the trendline
+  abline(lm(sub_data$Time ~ sub_data$Age), col="black")
 
 }
 
-
+#creates a 2x5 matrix layout for plots
 par(mfrow = c(2, 5))
 
+
+# loops over years 1973:1982 and calls function scat_plot to 
+# generate scatterplot and trendline
 for (curr_year in 1973:1982)
 {
   scat_plot(curr_year, cleaned_data)
@@ -208,23 +224,28 @@ for (curr_year in 1973:1982)
 ```
 
 ```{r}
-colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple", "blue", "cornflowerblue", "darkgreen", "lightgreen")
+#Code for creating a single scatterplot for all 10-years of data
 
+#assigning y and x values for the data
 y = cleaned_data$Time
 x = cleaned_data$Age
 
-plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], xlab = "Age", ylab = "Time")
+#creating a scatterplot for all data (colored by year) and the trend line
+plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], 
+     xlab = "Age (years)", ylab = "Time(hh:mm)", 
+     xlim = c(0,80))
 title(main = "Runners age and time from 1973 - 1982")
-abline(lm(y~x), col = "black")
+abline(lm(y~x), col = "black", lwd = 3)
 
-
+# loops over years 1973:1982 and generates a trendline for each year
 for (curr_year in 1973:1982)
 {
   sub_data = cleaned_data %>% filter(Year == curr_year)
-  abline(lm(sub_data$Time~sub_data$Age), col = colors[curr_year - 1972])
+  abline(lm(sub_data$Time ~ sub_data$Age), col = colors[curr_year - 1972])
 }
 
-legend("topright", inset = .05, title = "Years",legend = 1973:1982, fill = c(1:7))
+# creates a legend for the plot
+legend("right", inset = .005, title = "Years",legend = c( "All years", 1973:1982), fill = c("black", colors))
 
 ```
 
@@ -312,7 +333,7 @@ age_percentile_histogram <- cleaned_data_Performance %>%
           type = "histogram2d", colorscale = "rainbow", 
           ygap = 1, xgap = 1) %>%
   layout(title = "Age vs Performance",
-         xaxis = list(title = "Age Group"),
+         xaxis = list(title = "Age Group (in years)"),
          yaxis = list(title = "Percentile", categoryorder = "array", categoryarray = percentile),
          legend = list(title = "Counts"))
 
