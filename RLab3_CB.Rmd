@@ -264,7 +264,7 @@ Write a short interpretation of the plot as if you were explaining it to your cl
 
 As The ages increase, the times of the runners increase as well. 
 
-**Looking at the red line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.**
+**Looking at the black line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.**
 
 # Question 3
 
@@ -331,11 +331,6 @@ cleaned_data_Performance <- as_tibble(cleaned_data_Performance) %>%
     Age >= 70 ~ ageGroup[7]
   ))
 
-# cleaned_data_Performance$AgeGroup <- factor(cleaned_data_Performance$AgeGroup,
-#                      levels = ageGroup,
-#                      ordered = FALSE)
-# summary(cleaned_data_Performance$AgeGroup)
-
 
 # Create a 2D histogram plot using plotly
 age_percentile_histogram <- cleaned_data_Performance %>%
@@ -354,7 +349,7 @@ age_percentile_histogram
 ```
 
 
-
+This interactive heat map of performance group in percentiles by age group shows the counts by color ranging from 0-600
 
 
 
