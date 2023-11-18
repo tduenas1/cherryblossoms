@@ -3,6 +3,10 @@ title: "Lab 3"
 output: rmdformats::downcute
 ---
 
+# 3DS : Cherry Blossom
+
+## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -240,3 +244,67 @@ Write a short interpretation of the plot as if you were explaining it to your cl
     The age groups we're interested in are defined by decade, so separate people in their 20's from people in their 30's and so forth.\
     Generate one plot that displays the age composition of each of the ten performance groups. Make sure you're using all ten year's worth of data.\
     Hint: You can compute performance groups manually from `Year` and `Time`, or by carefully manipulating `Pis/Tis`.
+    
+```{r}
+percentile <- c("10th","20th", "30th", "40th", "50th", "60th","70th", "80th", "90th", "100th")
+cleaned_data_Performance <- matrix(ncol=10)
+colnames(cleaned_data_Performance) <- c(colnames(cleaned_data), "centile")
+
+for (i in unique(cleaned_data$Year)){
+  
+  temp <- as_tibble(cleaned_data) %>% 
+  filter(Year == i ) %>% 
+    mutate(centile = ecdf(.data$Time)(.data$Time))  
+  invisible(cleaned_data_Performance <- rbind(cleaned_data_Performance,temp))
+}
+
+cleaned_data_Performance <- cleaned_data_Performance[-1,]
+
+cleaned_data_Performance <- as_tibble(cleaned_data_Performance) %>% 
+mutate(Percentile = case_when(
+                         centile < .10 ~ percentile[1],
+        centile >= .10 & centile < .20 ~ percentile[2],
+        centile >= .20 & centile < .30 ~ percentile[3],
+        centile >= .30 & centile < .40 ~ percentile[4],
+        centile >= .40 & centile < .50 ~ percentile[5],
+        centile >= .50 & centile < .60 ~ percentile[6],
+        centile >= .60 & centile < .70 ~ percentile[7],
+        centile >= .70 & centile < .80 ~ percentile[8],
+        centile >= .80 & centile < .90 ~ percentile[9],
+        centile >= .90 & centile <= 1.0 ~ percentile[10]
+      ))%>% 
+  select(-centile)
+
+ageGroup <- c("0-19","20-29", "30-39", "40-49", "50-59", "60-69","70-79+")
+
+cleaned_data_Performance <- as_tibble(cleaned_data_Performance) %>% 
+  mutate(AgeGroup = case_when(
+                Age < 20 ~ ageGroup[1],
+    Age >= 20 & Age < 30 ~ ageGroup[2],
+    Age >= 30 & Age < 40 ~ ageGroup[3],
+    Age >= 40 & Age < 50 ~ ageGroup[4],
+    Age >= 50 & Age < 60 ~ ageGroup[5],
+    Age >= 60 & Age < 70 ~ ageGroup[6],
+               Age >= 70 ~ ageGroup[7]
+    ))
+
+# cleaned_data_Performance$AgeGroup <- factor(cleaned_data_Performance$AgeGroup,
+#                      levels = ageGroup,
+#                      ordered = FALSE)
+# summary(cleaned_data_Performance$AgeGroup)
+
+age_percentile_histogram <- cleaned_data_Performance %>%
+  plot_ly(x = ~ AgeGroup, 
+          y = ~ Percentile, 
+          type = "histogram2d", colorscale="rainbow", 
+          ygap=1, xgap=1) %>%
+  layout(title = "Age vs Performance",
+         xaxis = list(title = "Age Group"),
+         yaxis = list(title = "Percentile",categoryorder = "array", categoryarray = percentile),
+         legend = list(title = "Counts"))
+
+age_percentile_histogram
+
+```
+    
+    
