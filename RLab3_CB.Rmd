@@ -182,44 +182,46 @@ p
 
 ```{r}
 
-#colors for graph
+# Colors for the graph
 colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple",
             "blue", "cornflowerblue", "darkgreen", "lightgreen")
 
-#creating a scatterplot function that inputs the current year and data and
-# outputs scatterplot for the year and it's trend line
-scat_plot = function(curr_year,cleaned_data)
+# Creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and its trend line
+scat_plot <- function(curr_year, cleaned_data)
 {
 
-  #subsetting data by given year
-  sub_data = cleaned_data %>% filter(Year == curr_year)
+  # Subsetting data by given year
+  sub_data <- cleaned_data %>% filter(Year == curr_year)
   
-  #scatterplot of age vs time 
+  # Scatterplot of age vs time 
   plot(sub_data$Time ~ sub_data$Age,
        main = curr_year,
        xlab = "Age (years)",
        ylab = "Time (hh:mm)",
-       xlim = c(0,80),
+       yaxt = "n",
+       xlim = c(0, 80),
        col = colors[curr_year - 1972]
-       )
-  # plots the trendline
-  abline(lm(sub_data$Time ~ sub_data$Age), col="black")
+  )
+  
+  # Plots the trendline
+  abline(lm(sub_data$Time ~ sub_data$Age), col = "black")
 
+  # Custom y-axis labels displayed as time
+  custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+  tick_positions <- seq(min(sub_data$Time), max(sub_data$Time), length.out = length(custom_ticks))
+  axis(2, at = tick_positions, labels = custom_ticks, las = 2)
 }
 
-#creates a 2x5 matrix layout for plots
+# Creates a 2x5 matrix layout for plots
 par(mfrow = c(2, 5))
 
-
-# loops over years 1973:1982 and calls function scat_plot to 
+# Loops over years 1973:1982 and calls function scat_plot to 
 # generate scatterplot and trendline
 for (curr_year in 1973:1982)
 {
   scat_plot(curr_year, cleaned_data)
 }
-
-
-
 
 ```
 
