@@ -213,9 +213,10 @@ colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple", "blue"
 y = cleaned_data$Time
 x = cleaned_data$Age
 
-plot(x,y, col = colors[factor(cleaned_data$Year - 1972)])
-title(main = "Runners age and time from 1973 - 1982", xlab = "Age", ylab = "Time")
+plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], xlab = "Age", ylab = "Time")
+title(main = "Runners age and time from 1973 - 1982")
 abline(lm(y~x), col = "black")
+
 
 for (curr_year in 1973:1982)
 {
@@ -224,7 +225,6 @@ for (curr_year in 1973:1982)
 }
 
 legend("topright", inset = .05, title = "Years",legend = 1973:1982, fill = c(1:7))
-
 
 ```
 
@@ -242,7 +242,7 @@ As The ages increase, the times of the runners increase as well.
     Generate one plot that displays the age composition of each of the ten performance groups. Make sure you're using all ten year's worth of data.\
     Hint: You can compute performance groups manually from `Year` and `Time`, or by carefully manipulating `Pis/Tis`.
 
-```{r}
+```{r 3}
 
 # Define percentiles
 percentile <- c("10th", "20th", "30th", "40th", "50th", "60th", "70th", "80th", "90th", "100th")
