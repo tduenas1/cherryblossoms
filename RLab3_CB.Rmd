@@ -231,7 +231,7 @@ y = cleaned_data$Time
 x = cleaned_data$Age
 
 #creating a scatterplot for all data (colored by year) and the trend line
-plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], 
+plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], yaxt = "n", 
      xlab = "Age (years)", ylab = "Time(hh:mm)", 
      xlim = c(0,80))
 title(main = "Runners age and time from 1973 - 1982")
@@ -246,6 +246,15 @@ for (curr_year in 1973:1982)
 
 # creates a legend for the plot
 legend("right", inset = .005, title = "Years",legend = c( "All years", 1973:1982), fill = c("black", colors))
+
+# custome y-axis labels displayed as time
+custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+tick_positions <- seq(min(y), max(y), 
+                      length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+# Now you can use these custom ticks and labels on the y-axis
+axis(2, at = tick_positions, labels = custom_ticks, las = 2)
 
 ```
 
