@@ -28,27 +28,6 @@ library(vroom)
 
 ```{r}
 
-cb_5k_2006_2019_weather <- vroom("cb_5k_2006_2019_weather.csv", 
-                                 col_types = cols(
-  Year = col_double(),
-  Name = col_character(),
-  Age = col_integer(),
-  Time = col_time(format = ""),
-  Pace = col_time(format = ""),
-  Division = col_character(),
-  Hometown = col_character(),
-  Distance = col_character(),
-  pos_by_sex = col_integer(),
-  total_by_sex = col_double(),
-  pos_by_division = col_integer(), 
-  total_by_division = col_double(),
-  Sex = col_character(),
-  DATE = col_date(format = "%Y-%m-%d"),
-  PRCP = col_double(),
-  TMAX = col_double(),
-  TMIN = col_double()
-))
-
 cb_10M_1973_2005_weather <- vroom("cb_10M_1973_2005_weather.csv", 
                                  col_types = cols(
   Year = col_double(),
@@ -95,7 +74,6 @@ cb_10M_2006_2019_weather <- vroom("cb_10M_2006_2019_weather.csv",
 combined_data <- bind_rows(
   cb_10M_1973_2005_weather,
   cb_10M_2006_2019_weather,
-  cb_5k_2006_2019_weather
 )
 
 combined_data$Hometown[combined_data$Hometown == "NR"] <- NA
