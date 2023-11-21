@@ -1,0 +1,41 @@
+---
+title: "R Coding Lab Part 4"
+output: rmdformats::downcute
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
+
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful! Refer to last Thursday's class notes for details on conflict resolution.**
+
+**ALSO, all plots generated should have labeled axes, titles, and legends when appropriate. Don't forget units of measurement! Make sure these plots could be interpreted by your client.**
+
+These problems were adapted from **Cleaning Data for Effective Data Science** by David Mertz
+
+# Dealing With Outliers
+
+The Michelson–Morley experiment was an attempt in the late 19th century to detect the existence of the luminiferous aether, a widely assumed medium that would carry light waves. This was the most famous “failed experiment” in the history of physics in that it did not detect what it was looking for—something we now know not to exist at all.
+
+The general idea was to measure the speed of light under different orientations of the equipment relative to the direction of movement of the Earth, since relative movement of the ether medium would add or subtract from the speed of the wave. Yes, it does not work that way under the theory of relativity, but it was a reasonable guess 150 years ago.
+
+Apart from the physics questions, the dataset derived by the Michelson–Morley experiment is widely available, including the sample given in `morley.dat`. The specific numbers in this data are measurements of the speed of light in km/s with a zero point of 299,000. So, for example, the mean measurement in experiment 1 was 299,909 km/s (you can check this when you load the data).
+
+1) Using R to identify the outliers first within each setup (defined by the `Expt` number) and then within the data collection as a whole. The hope in the original experiment was that each setup would show a significant difference in central tendency. We did not cover confidence levels and null hypotheses, so simply create visualization(s) that aids you in gaining insight into how much apparent difference exists between the several setups.
+
+2) If you discard the outliers within each setup, are the differences between setups increased or decreased? Answer with either a visualization or by looking at statistics on the reduced groups.
+
+# Mispelled Names
+Our data set `humans-names.csv` contains 25,000 height and weight measurements. Each row has a person’s first name pulled from the US Social Security Agency list of common first names over the last century.
+
+Unfortunately, our hypothetical data collectors for this dataset are simply terrible typists, and they make typos when entering names with alarming frequency. There are some number of intended names in this dataset, but quite a few simple miscodings of those names as well. Your goal is to clean up these mispelled names.
+
+1) Identify every genuine name and correct all the misspelled ones to the correct canonical spelling. Use all the data wrangling tools you'd like (e.g. `dplyr` functions), but make sure you're checking each reassignment to make sure the names get classified correctly. You'll fully automate this process later. It is probably reasonable to assume that rare spellings are typos, at least if they are also relatively similar to common spellings.  
+Hint: There are a number of ways to measure the similarity of strings and that provide a clue as to likely typos. One general class of approach is in terms of edit distance between strings, which describes how many editing operations need to be done to transform one string into another. The R package `stringdist` provides Damerau–Levenshtein, Hamming, Levenshtein, and optimal string alignment as measures of edit distance. Keep in mind that sometimes multiple legitimate names are actually close to each other in terms of similarity measures (Dan VS Don, Jacob VS Jakob, etc). If you want to use `stringdist` for this problem, start by looking at the functions `stringdist()` and `stringdistmatrix()`.
+
+2) For each of the genuine names identified in (1), produce a histogram showing the distribution of Damerau–Levenshtein distances from the genuine name to the miscassified data. Make sure distances from genuine names to other genuine names are not included in these distributions.  
+Arrange all of the histograms into one figure write a short interpretation of it intended for a non-statistician client. 
+
+3) Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible! 
