@@ -95,6 +95,7 @@ df <- df %>%
 ```
 
 ```{r}
+# add final data to git repository
 # write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
 ```
 
@@ -143,6 +144,6 @@ plot_histogram_matrix(1983:1992, df, 2, 5)
 plot_histogram_matrix(1993:2002, df, 2, 5)
 plot_histogram_matrix(2003:2012, df, 2, 5)
 plot_histogram_matrix(2013:2017, df, 1, 5)
-plot_histogram_matrix(2017:2019, df, 1, 3)
+plot_histogram_matrix(2018:2019, df, 1, 2)
 
 ```
