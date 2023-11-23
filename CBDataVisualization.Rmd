@@ -19,88 +19,133 @@ With our data visualization we are determining the association between age and f
 # load packages
 library(dplyr)
 library(ggplot2)
-library(lubridate)
 library(chron)
 library(plotly)
 library(purrr)
 library(RColorBrewer)
 library(readr)
-library(vroom)
 ```
 
 ```{r}
 
-cb_10M_1973_2005_weather <- vroom("cb_10M_1973_2005_weather.csv", 
-                                 col_types = cols(
-  Year = col_double(),
-  Name = col_character(),
-  Age = col_integer(),
-  Time = col_time(format = ""),
-  Pace = col_time(format = ""),
-  Division = col_character(),
-  Hometown = col_character(),
-  Distance = col_character(),
-  pos_by_sex = col_integer(),
-  total_by_sex = col_double(),
-  pos_by_division =col_integer(), 
-  total_by_division = col_double(),
-  Sex = col_character(),
-  DATE = col_date(format = "%Y-%m-%d"),
-  PRCP = col_double(),
-  TMAX = col_double(),
-  TMIN = col_double()
-))
+cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv")
 
-cb_10M_2006_2019_weather <- vroom("cb_10M_2006_2019_weather.csv", 
-                                 col_types = cols(
-  Year = col_double(),
-  Name = col_character(),
-  Age = col_integer(),
-  Time = col_time(format = ""),
-  Pace = col_time(format = ""),
-  Division = col_character(),
-  Hometown = col_character(),
-  Distance = col_character(),
-  pos_by_sex = col_integer(),
-  total_by_sex = col_double(),
-  pos_by_division = col_integer(), 
-  total_by_division = col_double(),
-  Sex = col_character(),
-  DATE = col_date(format = "%Y-%m-%d"),
-  PRCP = col_double(),
-  TMAX = col_double(),
-  TMIN = col_double()
-))
+cb_10M_2006_2019_weather <- read_csv("cb_10M_2006_2019_weather.csv")
+
+clean_data <- function(df) {
+  df <- select(df,
+               Year, Name, Age,
+               Time, Division,
+               pos_by_sex, total_by_sex,
+               Sex, PRCP, TMAX, TMIN)
+
+  df$Age[df$Age == 'NR'] <- 0
+  df$Time[df$Time == 'NR'] <- 0
+
+  df <- df %>%
+    mutate(
+      Year = as.integer(Year),
+      Name = as.character(Name),
+      Age = as.integer(Age, na.rm = TRUE),
+      Time = as.character(Time),
+      Division = as.character(Division),
+      pos_by_sex = as.integer(pos_by_sex),
+      total_by_sex = as.integer(total_by_sex),
+      Sex = as.character(Sex),
+      PRCP = as.numeric(PRCP),
+      TMAX = as.integer(TMAX),
+      TMIN = as.integer(TMIN)
+    )
+  
+  return(df)
+}
+
+df1 <- clean_data(cb_10M_1973_2005_weather)
+df2 <- clean_data(cb_10M_2006_2019_weather)
 
 
-combined_data <- bind_rows(
-  cb_10M_1973_2005_weather,
-  cb_10M_2006_2019_weather,
-)
-
-combined_data$Hometown[combined_data$Hometown == "NR"] <- NA
+df <- bind_rows(df1, df2)
 ```
 
 ```{r}
-cleaned_data <- combined_data %>%
-  filter(!is.na(Age)) %>%
-  filter(!is.na(Time) & Time != "")
 
-# Remove any non-numeric and non-column characters from 'Time'
-cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
+# fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
+df <- df %>%
+  mutate(
+    Time = ifelse(
+      Time >= "43:00:00" & Time <= "59:59:59",
+      paste0("00:", substr(Time, 1, 2), ":", substr(Time, 4, 5)),
+      Time
+    )
+  )
 
-# Remove NA's from 'Time' 
-cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
 
-# Remove empty strings from 'Time'
-cleaned_data <- cleaned_data[cleaned_data$Time != '', , drop = FALSE]
-
-# Converts 'Time' column to a time format
-cleaned_data$Time <- chron::times(cleaned_data$Time)
-
-# Removes any potential NA's generated from the conversion above
-cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
+df <- df %>%
+  filter(!is.na(Time) & Time != "" & Time != "00:00:00") %>%
+  mutate(Time = chron::times(Time)) %>%
+  filter(!is.na(Time)) %>%
+  filter(Time >= "00:43:00" & Time <= "02:20:00") %>%
+  filter(Age >= 8 & Age <= 87) %>%
+  mutate(
+    # replaces 'W' with 'F' in sex col
+    Sex = ifelse(Sex == 'W', 'F', Sex),
+    # correction for missing values by first character in division
+    Sex = ifelse(substr(Division, 1, 1) == 'W', 'F', Sex),
+    Sex = ifelse(substr(Division, 1, 1) == 'M', 'M', Sex)
+  )
 
 ```
 
-# Data Visualization
+```{r}
+# add final data to git repository
+# write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
+```
+
+
+
+These were helping me evaluate the data cleaning, we can fix or replace them later
+```{r}
+# Function to create histogram and density plot pairs for different years
+plot_histogram_density <- function(plot_year, cleaned_data) {
+  # Pulls out data from 'cleaned_data' based on 'plot_year'
+  subset_data <- df[df$Year == plot_year, ]
+  
+  # Makes histogram of data without plotting it
+  hist_data <- hist(subset_data$Time, breaks = 10, plot = FALSE)
+  
+  # Plots above generated histogram with color and labels
+  plot(hist_data, col = "lightblue",
+       main = paste("", plot_year),
+       xlab = "Time (hr:min)",
+       ylab = "Density",
+       freq = FALSE, xaxt = "n")
+  
+  # Custom x-axis with labels as hours and minutes
+  axis(1, at = hist_data$breaks,
+       labels = chron(times = hist_data$breaks, format = "h:mm"),
+       las = 2)
+  
+  # Adds density plot line in blue over histogram
+  lines(density(subset_data$Time), col = "blue", lwd = 2)
+}
+
+# Function to create a matrix layout for plots
+plot_histogram_matrix <- function(years, df, parx, pary) {
+  # Set the layout for plots
+  par(mfrow = c(parx, pary))
+  
+  # Loop over the specified years and call the plot function
+  for (year in years) {
+    plot_histogram_density(year, df)
+  }
+}
+
+# Call the function with the range of years and custom layout parameters
+plot_histogram_matrix(1973:1982, df, 2, 5)
+plot_histogram_matrix(1983:1992, df, 2, 5)
+plot_histogram_matrix(1993:2002, df, 2, 5)
+plot_histogram_matrix(2003:2012, df, 2, 5)
+plot_histogram_matrix(2013:2017, df, 1, 5)
+plot_histogram_matrix(2018:2019, df, 1, 2)
+
+```
