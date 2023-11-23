@@ -19,32 +19,212 @@ These problems were adapted from **Cleaning Data for Effective Data Science** by
 # load packages
 library(dplyr)
 library(stringdist)
+library(ggplot2)
+library(gridExtra)
+
 ```
 
 # Dealing With Outliers
 
-The Michelson--Morley experiment was an attempt in the late 19th century to detect the existence of the luminiferous aether, a widely assumed medium that would carry light waves. This was the most famous "failed experiment" in the history of physics in that it did not detect what it was looking for---something we now know not to exist at all.
+**The Michelson--Morley experiment was an attempt in the late 19th century to detect the existence of the luminiferous aether, a widely assumed medium that would carry light waves. This was the most famous "failed experiment" in the history of physics in that it did not detect what it was looking for---something we now know not to exist at all.**
 
-The general idea was to measure the speed of light under different orientations of the equipment relative to the direction of movement of the Earth, since relative movement of the ether medium would add or subtract from the speed of the wave. Yes, it does not work that way under the theory of relativity, but it was a reasonable guess 150 years ago.
+**The general idea was to measure the speed of light under different orientations of the equipment relative to the direction of movement of the Earth, since relative movement of the ether medium would add or subtract from the speed of the wave. Yes, it does not work that way under the theory of relativity, but it was a reasonable guess 150 years ago.**
 
-Apart from the physics questions, the dataset derived by the Michelson--Morley experiment is widely available, including the sample given in `morley.dat`. The specific numbers in this data are measurements of the speed of light in km/s with a zero point of 299,000. So, for example, the mean measurement in experiment 1 was 299,909 km/s (you can check this when you load the data).
+**Apart from the physics questions, the dataset derived by the Michelson--Morley experiment is widely available, including the sample given in `morley.dat`. The specific numbers in this data are measurements of the speed of light in km/s with a zero point of 299,000. So, for example, the mean measurement in experiment 1 was 299,909 km/s (you can check this when you load the data).**
 
-1)  Using R to identify the outliers first within each setup (defined by the `Expt` number) and then within the data collection as a whole. The hope in the original experiment was that each setup would show a significant difference in central tendency. We did not cover confidence levels and null hypotheses, so simply create visualization(s) that aids you in gaining insight into how much apparent difference exists between the several setups.
+```{r}
+morley <- read.table("morley.dat", header = TRUE)
 
-2)  If you discard the outliers within each setup, are the differences between setups increased or decreased? Answer with either a visualization or by looking at statistics on the reduced groups.
+summary(morley)
+```
+
+**1. Using R to identify the outliers first within each setup (defined by the `Expt` number) and then within the data collection as a whole. The hope in the original experiment was that each setup would show a significant difference in central tendency. We did not cover confidence levels and null hypotheses, so simply create visualization(s) that aids you in gaining insight into how much apparent difference exists between the several setups.**
+
+```{r}
+# Group by Experiment and calculate summary statistics
+summary_stats <- morley %>%
+  group_by(Expt) %>%
+  summarise(
+    Mean = mean(Speed),
+    Median = median(Speed),
+    SD = sd(Speed),
+    Min = min(Speed),
+    Max = max(Speed)
+  )
+
+# Calculate overall summary statistics
+overall_stats <- morley %>%
+  summarise(
+    Mean = mean(Speed),
+    Median = median(Speed),
+    SD = sd(Speed),
+    Min = min(Speed),
+    Max = max(Speed)
+  )
+
+# Add the overall summary as a row to the summary_stats data frame
+summary_stats <- bind_rows(summary_stats, overall_stats)
+
+# Print the updated summary statistics
+print(summary_stats)
+
+```
+
+```{r}
+# Create a boxplot for each experiment
+p1 <- ggplot(morley, aes(x = factor(Expt), y = Speed)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Speed by Experiment",
+       x = "Experiment",
+       y = "Speed (km/s)")
+
+# Create a boxplot for the overall data
+p2 <- ggplot(morley, aes(x = 1, y = Speed)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Speed (Overall)",
+       x = "Overall",
+       y = "Speed (km/s)")
+
+# Combine the plots
+grid.arrange(p1, p2)
+
+
+
+# Extract outliers for each experiment
+outliers_by_expt <- lapply(levels(factor(morley$Expt)), function(level) {
+  subset_data <- morley$Speed[morley$Expt == level]
+  out <- boxplot.stats(subset_data)$out
+  out_ind <- which(subset_data %in% c(out))
+  if (length(out_ind) > 0) {
+    return(data.frame(Expt = level, Run = out_ind, Speed = subset_data[out_ind]))
+  } else {
+    return(NULL)
+  }
+})
+
+# Combine the outlier information into a single data frame
+outliers_df <- do.call(rbind, Filter(function(x) !is.null(x), outliers_by_expt))
+outliers_df
+
+# Identify outliers in the full dataset
+outliers_full <- boxplot.stats(morley$Speed)$out
+outliers_full_indices <- which(morley$Speed %in% outliers_full)
+
+# Create a data frame with outlier information
+outliers_full_df <- data.frame(
+  Expt = morley$Expt[outliers_full_indices],
+  Run = outliers_full_indices,
+  Speed = morley$Speed[outliers_full_indices]
+)
+
+# Show the resulting data frame
+print(outliers_full_df)
+```
+
+**2. If you discard the outliers within each setup, are the differences between setups increased or decreased? Answer with either a visualization or by looking at statistics on the reduced groups.**
+
+```{r}
+# Convert "Expt" to numeric in outliers_df
+outliers_df$Expt <- as.numeric(outliers_df$Expt)
+
+# Now perform the anti-join
+morley_cleaned <- morley %>%
+  anti_join(outliers_df, by = c("Expt", "Run"))
+
+
+# Group by Experiment and calculate summary statistics
+summary_stats <- morley_cleaned %>%
+  group_by(Expt) %>%
+  summarise(
+    Mean = mean(Speed),
+    Median = median(Speed),
+    SD = sd(Speed),
+    Min = min(Speed),
+    Max = max(Speed)
+  )
+
+# Calculate overall summary statistics
+overall_stats <- morley_cleaned %>%
+  summarise(
+    Mean = mean(Speed),
+    Median = median(Speed),
+    SD = sd(Speed),
+    Min = min(Speed),
+    Max = max(Speed)
+  )
+
+# Add the overall summary as a row to the summary_stats data frame
+summary_stats <- bind_rows(summary_stats, overall_stats)
+
+# Print the updated summary statistics
+print(summary_stats)
+
+
+```
+
+```{r}
+# Create a boxplot for each experiment
+p3 <- ggplot(morley_cleaned, aes(x = factor(Expt), y = Speed)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Speed by Experiment",
+       x = "Experiment",
+       y = "Speed (km/s)")
+
+# Create a boxplot for the overall data
+p4 <- ggplot(morley_cleaned, aes(x = 1, y = Speed)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Speed (Overall)",
+       x = "Overall",
+       y = "Speed (km/s)")
+
+# Combine the plots
+grid.arrange(p3, p4)
+
+
+
+# Extract outliers for each experiment
+outliers_by_expt2 <- lapply(levels(factor(morley_cleaned$Expt)), function(level) {
+  subset_data <- morley_cleaned$Speed[morley_cleaned$Expt == level]
+  out <- boxplot.stats(subset_data)$out
+  out_ind <- which(subset_data %in% c(out))
+  if (length(out_ind) > 0) {
+    return(data.frame(Expt = level, Run = out_ind, Speed = subset_data[out_ind]))
+  } else {
+    return(NULL)
+  }
+})
+
+# Combine the outlier information into a single data frame
+outliers_df2 <- do.call(rbind, Filter(function(x) !is.null(x), outliers_by_expt2))
+outliers_df2
+
+# Identify outliers in the full dataset
+outliers_full2 <- boxplot.stats(morley_cleaned$Speed)$out
+outliers_full_indices2 <- which(morley_cleaned$Speed %in% outliers_full2)
+
+# Create a data frame with outlier information
+outliers_full_df2 <- data.frame(
+  Expt = morley_cleaned$Expt[outliers_full_indices2],
+  Run = outliers_full_indices2,
+  Speed = morley_cleaned$Speed[outliers_full_indices2]
+)
+
+# Show the resulting data frame
+print(outliers_full_df2)
+```
 
 # Mispelled Names
 
-Our data set `humans-names.csv` contains 25,000 height and weight measurements. Each row has a person's first name pulled from the US Social Security Agency list of common first names over the last century.
+**Our data set `humans-names.csv` contains 25,000 height and weight measurements. Each row has a person's first name pulled from the US Social Security Agency list of common first names over the last century.**
 
-Unfortunately, our hypothetical data collectors for this dataset are simply terrible typists, and they make typos when entering names with alarming frequency. There are some number of intended names in this dataset, but quite a few simple miscodings of those names as well. Your goal is to clean up these mispelled names.
+**Unfortunately, our hypothetical data collectors for this dataset are simply terrible typists, and they make typos when entering names with alarming frequency. There are some number of intended names in this dataset, but quite a few simple miscodings of those names as well. Your goal is to clean up these mispelled names.**
 
 ```{r}
 humans <- readr::read_csv("humans-names.csv", show_col_types = FALSE)
 ```
 
-1)  Identify every genuine name and correct all the misspelled ones to the correct canonical spelling. Use all the data wrangling tools you'd like (e.g. `dplyr` functions), but make sure you're checking each reassignment to make sure the names get classified correctly. You'll fully automate this process later. It is probably reasonable to assume that rare spellings are typos, at least if they are also relatively similar to common spellings.\
-    Hint: There are a number of ways to measure the similarity of strings and that provide a clue as to likely typos. One general class of approach is in terms of edit distance between strings, which describes how many editing operations need to be done to transform one string into another. The R package `stringdist` provides Damerau--Levenshtein, Hamming, Levenshtein, and optimal string alignment as measures of edit distance. Keep in mind that sometimes multiple legitimate names are actually close to each other in terms of similarity measures (Dan VS Don, Jacob VS Jakob, etc). If you want to use `stringdist` for this problem, start by looking at the functions `stringdist()` and `stringdistmatrix()`.
+1)  **Identify every genuine name and correct all the misspelled ones to the correct canonical spelling. Use all the data wrangling tools you'd like (e.g. `dplyr` functions), but make sure you're checking each reassignment to make sure the names get classified correctly. You'll fully automate this process later. It is probably reasonable to assume that rare spellings are typos, at least if they are also relatively similar to common spellings.\
+    Hint: There are a number of ways to measure the similarity of strings and that provide a clue as to likely typos. One general class of approach is in terms of edit distance between strings, which describes how many editing operations need to be done to transform one string into another. The R package `stringdist` provides Damerau--Levenshtein, Hamming, Levenshtein, and optimal string alignment as measures of edit distance. Keep in mind that sometimes multiple legitimate names are actually close to each other in terms of similarity measures (Dan VS Don, Jacob VS Jakob, etc). If you want to use `stringdist` for this problem, start by looking at the functions `stringdist()` and `stringdistmatrix()`.**
 
 ```{r}
 # unique names
@@ -149,7 +329,7 @@ num_names_mut <- humans_mutated$Name %>% table(.)
 num_names_mut
 ```
 
-2)  For each of the genuine names identified in (1), produce a histogram showing the distribution of Damerau--Levenshtein distances from the genuine name to the miscassified data. Make sure distances from genuine names to other genuine names are not included in these distributions.\
-    Arrange all of the histograms into one figure write a short interpretation of it intended for a non-statistician client.
+2)  **For each of the genuine names identified in (1), produce a histogram showing the distribution of Damerau--Levenshtein distances from the genuine name to the miscassified data. Make sure distances from genuine names to other genuine names are not included in these distributions.\
+    Arrange all of the histograms into one figure write a short interpretation of it intended for a non-statistician client.**
 
-3)  Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible!
+3)  **Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible!**
