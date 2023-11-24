@@ -21,8 +21,8 @@ library(dplyr)
 library(stringdist)
 library(ggplot2)
 library(gridExtra)
+library(cowplot)
 library(Hmisc)
-
 ```
 
 # Dealing With Outliers
@@ -303,6 +303,7 @@ Concluding thoughts: There were 6 identified outliers in the individual experime
 **Unfortunately, our hypothetical data collectors for this dataset are simply terrible typists, and they make typos when entering names with alarming frequency. There are some number of intended names in this dataset, but quite a few simple miscodings of those names as well. Your goal is to clean up these mispelled names.**
 
 ```{r}
+#Reading the dataset into 'humans' dataframe
 humans <- readr::read_csv("humans-names.csv", show_col_types = FALSE)
 ```
 
@@ -310,14 +311,15 @@ humans <- readr::read_csv("humans-names.csv", show_col_types = FALSE)
     Hint: There are a number of ways to measure the similarity of strings and that provide a clue as to likely typos. One general class of approach is in terms of edit distance between strings, which describes how many editing operations need to be done to transform one string into another. The R package `stringdist` provides Damerau--Levenshtein, Hamming, Levenshtein, and optimal string alignment as measures of edit distance. Keep in mind that sometimes multiple legitimate names are actually close to each other in terms of similarity measures (Dan VS Don, Jacob VS Jakob, etc). If you want to use `stringdist` for this problem, start by looking at the functions `stringdist()` and `stringdistmatrix()`.**
 
 ```{r}
-# unique names
+# Extracting unique names from the 'Name' column
 unique_names <- humans$Name %>% unique(.)
 
-# number of unique names
+# Counting the number of unique names
 num_names <- humans$Name %>% table(.)
 ```
 
 ```{r}
+#List of misspelled names to be replaced with genuine names
 names_to_replace <- list(
   c("ames", "Jamse", "Jamees", "Jmes", "Jaems", "Jame", "eJeames", "eJames", 
     "Jaemes", "Jeames", "Jmaes", "sameJ"),
@@ -382,6 +384,7 @@ names_to_replace <- list(
     "Willia", "Williaem", "Willieam", "Willima", "Wliliam", "Wlliam", "iWlliam")
 )
 
+# Mutating the 'Name' column to correct misspelled names
 humans_mutated <- humans %>%
   mutate(
     Name = case_when(
@@ -407,12 +410,62 @@ humans_mutated <- humans %>%
     )
   )
 
-
+# Counting the frequency of each unique name after correction
 num_names_mut <- humans_mutated$Name %>% table(.)
 num_names_mut
 ```
 
 2)  **For each of the genuine names identified in (1), produce a histogram showing the distribution of Damerau--Levenshtein distances from the genuine name to the miscassified data. Make sure distances from genuine names to other genuine names are not included in these distributions.\
     Arrange all of the histograms into one figure write a short interpretation of it intended for a non-statistician client.**
+
+```{r, fig.width= 14}
+
+# 
+calc_distance <- function(genuine_name, data_names) {
+  distances <- stringdist::stringdist(genuine_name, data_names, method = "dl")
+  distances
+}
+
+# 
+genuine_names <- c("James", "Barbara", "David", "Elizabeth", "Jessica", "Jennifer",
+                   "John", "Jon", "Joseph", "Linda", "Marie", "Mary", "Michael",
+                   "Patricia", "Richard", "Robert", "Susan", "William")
+
+# 
+misclassified_data <- humans %>%
+  filter(!Name %in% genuine_names)
+
+# 
+histograms <- lapply(genuine_names, function(name) {
+  distances <- calc_distance(name, misclassified_data$Name)
+  ggplot(data.frame(Distance = distances), aes(x = Distance)) +
+    geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+    ggtitle(paste( name )) +
+    xlab("D–L Dist") +
+    ylab("Freq")
+    })
+
+# 
+multiplot <- cowplot::plot_grid(plotlist = histograms, nrow = 3)
+title <- ggdraw() + 
+  draw_label(
+    "Damerau–Levenshtein Distances between \n Genuine Names and Misclassified Data",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 75)
+  )
+plot_grid(
+  title, multiplot,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+#multiplot
+```
 
 3)  **Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible!**
