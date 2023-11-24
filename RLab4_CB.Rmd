@@ -39,8 +39,11 @@ morley <- read.table("morley.dat", header = TRUE)
 
 summary(morley)
 ```
+Actual mean is 299852.4, Values range from 299620 to 300070
 
-Looking at the overall statistics, it seems like the data I was given differs from the data described up above, but I will do what the questions ask with the data I was given.
+Here is the documentation on the data set:
+
+"A classical data of Michelson (but not this one with Morley) on measurements done in 1879 on the speed of light. The data consists of five experiments, each consisting of 20 consecutive ‘runs’. The response is the speed of light measurement, suitably coded (km/sec, with 299000 subtracted)."
 
 **1. Using R to identify the outliers first within each setup (defined by the `Expt` number) and then within the data collection as a whole. The hope in the original experiment was that each setup would show a significant difference in central tendency. We did not cover confidence levels and null hypotheses, so simply create visualization(s) that aids you in gaining insight into how much apparent difference exists between the several setups.**
 
@@ -470,3 +473,28 @@ plot_grid(
 ```
 
 3)  **Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible!**
+
+```{r}
+
+# 
+automated_correction <- function(data) {
+  corrected_data <- data %>%
+    mutate(
+      Name = case_when(
+        Name %in% unlist(names_to_replace) ~ 
+          sapply(Name, function(name) {
+            closest_match <- stringdist::stringdist(name, genuine_names, method = "dl")
+            genuine_names[which.min(closest_match)]
+          }),
+        TRUE ~ Name
+      )
+    )
+  corrected_data
+}
+# 
+automated_result <- automated_correction(humans)
+# 
+comparison <- sum(humans_mutated$Name == automated_result$Name) / nrow(humans_mutated)
+comparison
+
+```
