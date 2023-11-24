@@ -34,9 +34,9 @@ library(Hmisc)
 **Apart from the physics questions, the dataset derived by the Michelson--Morley experiment is widely available, including the sample given in `morley.dat`. The specific numbers in this data are measurements of the speed of light in km/s with a zero point of 299,000. So, for example, the mean measurement in experiment 1 was 299,909 km/s (you can check this when you load the data).**
 
 ```{r}
-
+# read morley data in
 morley <- read.table("morley.dat", header = TRUE)
-
+# summary of morley data
 summary(morley)
 ```
 Actual mean is 299852.4, Values range from 299620 to 300070
@@ -48,7 +48,7 @@ Here is the documentation on the data set:
 **1. Using R to identify the outliers first within each setup (defined by the `Expt` number) and then within the data collection as a whole. The hope in the original experiment was that each setup would show a significant difference in central tendency. We did not cover confidence levels and null hypotheses, so simply create visualization(s) that aids you in gaining insight into how much apparent difference exists between the several setups.**
 
 ```{r}
-
+# Calculate summary stats for each experiment (Mean, Min, Q1, Median, Q3, Max)
 summary_stats <- morley %>%
   group_by(Expt) %>%
   summarise(
@@ -60,7 +60,7 @@ summary_stats <- morley %>%
     Max = max(Speed)
   )
 
-
+# Calculate summary stats over all experiments
 overall_stats <- morley %>%
   summarise(
     Mean = mean(Speed),
@@ -71,55 +71,57 @@ overall_stats <- morley %>%
     Max = max(Speed)
   )
 
-
+# Combine above stats into one df
 summary_stats <- bind_rows(summary_stats, overall_stats)
 ```
 
 ```{r}
 
+# subset of summary stats for experiments 1-5
 subset_summary_stats <- summary_stats[1:5, ]
 
+# Create a boxplot for each experiment
 p1 <- ggplot(morley, aes(x = factor(Expt), y = Speed)) +
   geom_boxplot() +
-  geom_text(data = subset_summary_stats, 
+  geom_text(data = subset_summary_stats, # anotate max value 
             aes(x = Expt, y = 1050, label = sprintf("Max: %.1f", Max)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats, 
+  geom_text(data = subset_summary_stats, # anotate Q3 value
             aes(x = Expt, y = 1020, label = sprintf("Q3: %.1f", Q3)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats,
+  geom_text(data = subset_summary_stats, # anotate Median value
             aes(x = Expt, y = 920, label = sprintf("Median: %.1f", Median)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats,
+  geom_text(data = subset_summary_stats, # anotate Max Value
             aes(x = Expt, y = 890, label = sprintf("Mean: %.1f", Mean)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats,
+  geom_text(data = subset_summary_stats, # anotate Q1 value
             aes(x = Expt, y = 655, label = sprintf("Q1: %.1f", Q1)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats,
+  geom_text(data = subset_summary_stats, # anotate Min value
             aes(x = Expt, y = 620, label = sprintf("Min: %.1f", Min)), vjust = 0, hjust = 0.5) +
   labs(title = "Boxplot of Speed by Experiment",
        x = "Experiment Number",
        y = "Speed (km/s)")
 
-
+# subset of summary stats for the experiments overall
 subset1_summary_stats <- summary_stats[6, ]
 
-
+# Create a boxplot for overall stats
 p2 <- ggplot(morley, aes(x = 1, y = Speed)) +
   geom_boxplot() +
-  geom_text(data = subset1_summary_stats,
+  geom_text(data = subset1_summary_stats, # anotate max value
             aes(x = 1, y = 1050, label = sprintf("Max: %.1f", Max)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats, 
+  geom_text(data = subset1_summary_stats, # anotate Q3 value 
             aes(x = 1, y = 1000, label = sprintf("Q3: %.1f", Q3)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats,
+  geom_text(data = subset1_summary_stats, # anotate Median value
             aes(x = 1, y = 920, label = sprintf("Median: %.1f", Median)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats,
+  geom_text(data = subset1_summary_stats, # anotate Mean value
             aes(x = 1, y = 890, label = sprintf("Mean: %.1f", Mean)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats,
+  geom_text(data = subset1_summary_stats, # anotate Q1 value
             aes(x = 1, y = 660, label = sprintf("Q1: %.1f", Q1)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats, 
+  geom_text(data = subset1_summary_stats, # anotate Min value 
             aes(x = 1, y = 620, label = sprintf("Min: %.1f", Min)), vjust = 0, hjust = 1.1) +
   labs(title = "Boxplot of Speed by Experiment",
        x = "Overall",
        y = "Speed (km/s)")
 
-
+# Combine the plots
 grid.arrange(p1, p2, nrow = 2)
 
 ```
@@ -130,7 +132,7 @@ When we look at the data overall, we can see that there are 3 potential outliers
 
 ```{r}
 
-
+# Extract outliers for each experiment
 outliers_by_expt <- lapply(levels(factor(morley$Expt)), function(level) {
   subset_data <- morley$Speed[morley$Expt == level]
   out <- boxplot.stats(subset_data)$out
@@ -142,27 +144,27 @@ outliers_by_expt <- lapply(levels(factor(morley$Expt)), function(level) {
   }
 })
 
-
+# Combine the outlier information into a single data frame
 outliers_df <- do.call(rbind, Filter(function(x) !is.null(x), outliers_by_expt))
-
+# print outlier info for each experiment
 outliers_df
 ```
 
 When we extract the outliers from each experiment, we can see that there are 6 outliers. There is one outlier from the first Experiment and 5 from the third Experiment.
 
 ```{r}
-
+# Identify outliers in the full dataset
 outliers_full <- boxplot.stats(morley$Speed)$out
 outliers_full_indices <- which(morley$Speed %in% outliers_full)
 
-
+# Create a data frame with outlier information
 outliers_full_df <- data.frame(
   Expt = morley$Expt[outliers_full_indices],
   Run = outliers_full_indices,
   Speed = morley$Speed[outliers_full_indices]
 )
 
-
+# Show the resulting data frame
 print(outliers_full_df)
 ```
 
@@ -171,15 +173,15 @@ When we extract the outliers from the full data, we get 3. This time two of them
 **2. If you discard the outliers within each setup, are the differences between setups increased or decreased? Answer with either a visualization or by looking at statistics on the reduced groups.**
 
 ```{r}
-
+# Convert "Expt" to numeric in outliers_df
 outliers_df$Expt <- as.numeric(outliers_df$Expt)
 
-
+# Perform anti-join to delete outliers from morley
 morley_cleaned <- morley %>%
   anti_join(outliers_df, by = c("Expt", "Run"))
 
 
-
+# Group by Experiment and calculate summary statistics
 summary_stats_cl <- morley_cleaned %>%
   group_by(Expt) %>%
   summarise(
@@ -191,7 +193,7 @@ summary_stats_cl <- morley_cleaned %>%
     Max = max(Speed)
   )
 
-
+# Calculate overall summary statistics
 overall_stats_cl <- morley_cleaned %>%
   summarise(
     Mean = mean(Speed),
@@ -202,68 +204,70 @@ overall_stats_cl <- morley_cleaned %>%
     Max = max(Speed)
   )
 
-
+# Add the overall summary as a row to the summary_stats data frame
 summary_stats2 <- bind_rows(summary_stats_cl, overall_stats_cl)
 ```
 
 ```{r}
-
+# subset summary stats for experiments 1-5
 subset_summary_stats2 <- summary_stats2[1:5, ]
-
+# Create a boxplot for each experiment
 p3 <- ggplot(morley_cleaned, aes(x = factor(Expt), y = Speed)) +
   geom_boxplot() +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2,# anotate Max value 
             aes(x = Expt, y = 1050, label = sprintf("Max: %.1f", Max)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2, # anotate Q3 value 
             aes(x = Expt, y = 1020, label = sprintf("Q3: %.1f", Q3)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2, # anotate Median value 
             aes(x = Expt, y = 915, label = sprintf("Median: %.1f", Median)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2, # anotate Mean value 
             aes(x = Expt, y = 890, label = sprintf("Mean: %.1f", Mean)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2, # anotate Q1 value 
             aes(x = Expt, y = 735, label = sprintf("Q1: %.1f", Q1)), vjust = 0, hjust = 0.5) +
-  geom_text(data = subset_summary_stats2, 
+  geom_text(data = subset_summary_stats2, # anotate Min value 
             aes(x = Expt, y = 710, label = sprintf("Min: %.1f", Min)), vjust = 0, hjust = 0.5) +
   labs(title = "Boxplot of Speed by Experiment",
        x = "Experiment Number",
        y = "Speed (km/s)")
 
 
-
+# subset summary stats for overall stats
 subset1_summary_stats2 <- summary_stats2[6, ]
-
+# Create a boxplot for the overall data
 p4 <- ggplot(morley_cleaned, aes(x = 1, y = Speed)) +
   geom_boxplot() +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Max value 
             aes(x = 1, y = 1050, label = sprintf("Max: %.1f", Max)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Q3 value 
             aes(x = 1, y = 1010, label = sprintf("Q3: %.1f", Q3)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Median value 
             aes(x = 1, y = 915, label = sprintf("Median: %.1f", Median)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Mean value 
             aes(x = 1, y = 890, label = sprintf("Mean: %.1f", Mean)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Q1 value 
             aes(x = 1, y = 750, label = sprintf("Q1: %.1f", Q1)), vjust = 0, hjust = 1.1) +
-  geom_text(data = subset1_summary_stats2, 
+  geom_text(data = subset1_summary_stats2, # anotate Min value 
             aes(x = 1, y = 710, label = sprintf("Min: %.1f", Min)), vjust = 0, hjust = 1.1) +
   labs(title = "Boxplot of Speed by Experiment",
        x = "Overall",
        y = "Speed (km/s)")
 
 
-
+# display boxplots of each experiments with ouliers and without outliers
 grid.arrange(p1, p3, nrow = 2)
 ```
 
 After extracting the outliers, we can see a slight increase in the differences between some of the experiments. Experiments 2-5 still resemble each other a lot because they contain many of the same values, but Experiment 1 deviates a little more from the rest. Outliers were removed from Experiments 1 and 3 since they are the only experiments that had outliers individually. We can see that the mean/median/min values of Experiment 1 increased, and the quantile area shrunk. For Experiment 3, the only thing that changed was the mean and median values grew and the max and min values shrunk in distance. The differences for Experiments 2-5 look roughly the same after removing outliers. For Experiment 1, the common value area that it shared with the other Experiments shrunk, although the other Experiments still contain 30% of similar values with Experiment 1.
 
 ```{r}
+# display boxplots of overall data with and without outliers
 grid.arrange(p2, p4, nrow = 2)
 ```
 
 Looking at the overall stats the values didn't change significantly at all. The min value increased since the outliers were removed, but looking at the max value we can still see a value that shows up as an outlier in the overall data that isn't an outlier when we look at the individual experiments.
 
 ```{r}
+# Extract outliers for each experiment
 outliers_by_expt2 <- lapply(levels(factor(morley_cleaned$Expt)), function(level) {
   subset_data <- morley_cleaned$Speed[morley_cleaned$Expt == level]
   out <- boxplot.stats(subset_data)$out
@@ -275,23 +279,26 @@ outliers_by_expt2 <- lapply(levels(factor(morley_cleaned$Expt)), function(level)
   }
 })
 
+# Combine the outlier information into a single data frame
 outliers_df2 <- do.call(rbind, Filter(function(x) !is.null(x), outliers_by_expt2))
-
+# print outliers by each experiment
 outliers_df2
 ```
 
 This code above checked for outliers in the individual experiments after removing the initial outliers, it came out null.
 
 ```{r}
+# Identify outliers in the full dataset
 outliers_full2 <- boxplot.stats(morley_cleaned$Speed)$out
 outliers_full_indices2 <- which(morley_cleaned$Speed %in% outliers_full2)
 
+# Create a data frame with outlier information
 outliers_full_df2 <- data.frame(
   Expt = morley_cleaned$Expt[outliers_full_indices2],
   Run = outliers_full_indices2,
   Speed = morley_cleaned$Speed[outliers_full_indices2]
 )
-
+# Show the resulting data frame
 print(outliers_full_df2)
 ```
 
