@@ -483,7 +483,7 @@ plot_grid(
 
 ```{r}
 
-# 
+# creates a function that takes in the original data set and returns the cleaned version
 automated_correction <- function(data) {
   corrected_data <- data %>%
     mutate(
@@ -498,9 +498,9 @@ automated_correction <- function(data) {
     )
   corrected_data
 }
-# 
+# runs the automated result function using the humans data set
 automated_result <- automated_correction(humans)
-# 
+# compares the end result from problem one with problem 3
 comparison <- sum(humans_mutated$Name == automated_result$Name) / nrow(humans_mutated)
 comparison
 
