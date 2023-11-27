@@ -1552,7 +1552,7 @@ client.</strong></li>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  distances</span>
 <span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>}</span>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co"># vector with all genguine namtes</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co"># vector with all genuine names</span></span>
 <span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>genuine_names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;James&quot;</span>, <span class="st">&quot;Barbara&quot;</span>, <span class="st">&quot;David&quot;</span>, <span class="st">&quot;Elizabeth&quot;</span>, <span class="st">&quot;Jessica&quot;</span>, <span class="st">&quot;Jennifer&quot;</span>,</span>
 <span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>                   <span class="st">&quot;John&quot;</span>, <span class="st">&quot;Jon&quot;</span>, <span class="st">&quot;Joseph&quot;</span>, <span class="st">&quot;Linda&quot;</span>, <span class="st">&quot;Marie&quot;</span>, <span class="st">&quot;Mary&quot;</span>, <span class="st">&quot;Michael&quot;</span>,</span>
 <span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>                   <span class="st">&quot;Patricia&quot;</span>, <span class="st">&quot;Richard&quot;</span>, <span class="st">&quot;Robert&quot;</span>, <span class="st">&quot;Susan&quot;</span>, <span class="st">&quot;William&quot;</span>)</span>
@@ -1636,6 +1636,8 @@ achieves 90%, but shoot for higher if possible!</strong></li>
 <span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">sum</span>(humans_mutated<span class="sc">$</span>Name <span class="sc">==</span> automated_result<span class="sc">$</span>Name) <span class="sc">/</span> <span class="fu">nrow</span>(humans_mutated)</span>
 <span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a>comparison</span></code></pre></div>
 <pre><code>## [1] 0.99996</code></pre>
+<p>The accuracy of our function is 0.99996, which means that pretty much
+all of the rows match.</p>
 </div>
 </div>
 </div>
