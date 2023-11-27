@@ -506,3 +506,5 @@ comparison <- sum(humans_mutated$Name == automated_result$Name) / nrow(humans_mu
 comparison
 
 ```
+
+The accuracy of our function is 0.99996, which means that pretty much all of the rows match.

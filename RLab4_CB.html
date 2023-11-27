@@ -1601,7 +1601,7 @@ data frame to the one from problem (1) and quantify the accuracy
 (i.e. what proportion of rows match?). Make sure your automated process
 achieves 90%, but shoot for higher if possible!</strong></li>
 </ol>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># </span></span>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># creates a function that takes in the original data set and returns the cleaned version</span></span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>automated_correction <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
 <span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>  corrected_data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
@@ -1616,12 +1616,14 @@ achieves 90%, but shoot for higher if possible!</strong></li>
 <span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a>    )</span>
 <span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a>  corrected_data</span>
 <span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a>}</span>
-<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co"># runs the automated result function using the humans data set</span></span>
 <span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a>automated_result <span class="ot">&lt;-</span> <span class="fu">automated_correction</span>(humans)</span>
-<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co"># compares the end result from problem one with problem 3</span></span>
 <span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">sum</span>(humans_mutated<span class="sc">$</span>Name <span class="sc">==</span> automated_result<span class="sc">$</span>Name) <span class="sc">/</span> <span class="fu">nrow</span>(humans_mutated)</span>
 <span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a>comparison</span></code></pre></div>
 <pre><code>## [1] 0.99996</code></pre>
+<p>The accuracy of our function is 0.99996, which means that pretty much
+all of the rows match.</p>
 </div>
 </div>
 
