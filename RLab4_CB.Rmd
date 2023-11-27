@@ -479,6 +479,13 @@ plot_grid(
 
 ```
 
+#### Interpretation of Combined Histograms
+
+Each histogram represents the distances from a genuine name to the misclassified data. The x-axis represents the Damerau–Levenshtein distance, it indicate the number of different steps are required to transform one string into another(in our case, misclassified data to genuine name). The y-axis shows the frequency of these distances.
+
+The histograms illustrate how different the misclassified names are from the genuine ones. Higher peaks at lower distances indicate closer similarity between genuine names and misclassified data, while broader or higher tails show more distant or dissimilar names. This visualization helps in understanding the extent of typographical errors in the dataset and assists in identifying the threshold for automated correction.
+
+
 3)  **Write code that reclassifies names similar to problem (1), but fully automated. You should end up with a function that takes the original data set and returns a cleaned version. Compare this cleaned data frame to the one from problem (1) and quantify the accuracy (i.e. what proportion of rows match?). Make sure your automated process achieves 90%, but shoot for higher if possible!**
 
 ```{r}
