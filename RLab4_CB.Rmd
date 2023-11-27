@@ -479,11 +479,7 @@ plot_grid(
 )
 
 ```
-#### Interpretation of Combined Histograms
 
-Each histogram represents the distances from a genuine name to the misclassified data. The x-axis represents the Damerau–Levenshtein distance, it indicate the number of different steps are required to transform one string into another(in our case, misclassified data to genuine name). The y-axis shows the frequency of these distances.
-
-The histograms illustrate how different the misclassified names are from the genuine ones. Higher peaks at lower distances indicate closer similarity between genuine names and misclassified data, while broader or higher tails show more distant or dissimilar names. This visualization helps in understanding the extent of typographical errors in the dataset and assists in identifying the threshold for automated correction.
 
 
 #### Interpretation of Combined Histograms
