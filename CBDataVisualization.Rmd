@@ -26,23 +26,21 @@ library(RColorBrewer)
 library(readr)
 ```
 
-```{r}
+```{r, warning = FALSE}
 
-cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv")
+cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", show_col_types = FALSE)
 
-cb_10M_2006_2019_weather <- read_csv("cb_10M_2006_2019_weather.csv")
+cb_10M_2006_2019_weather <- read_csv("cb_10M_2006_2019_weather.csv", show_col_types = FALSE)
 
 clean_data <- function(df) {
-  df <- select(df,
-               Year, Name, Age,
-               Time, Division,
-               pos_by_sex, total_by_sex,
-               Sex, PRCP, TMAX, TMIN)
+  df <- dplyr::select(df, Year, Name, Age, 
+               Time, Division, pos_by_sex, 
+               total_by_sex, Sex, PRCP, TMAX, TMIN)
 
   df$Age[df$Age == 'NR'] <- 0
   df$Time[df$Time == 'NR'] <- 0
 
-  df <- df %>%
+df <- df %>%
     mutate(
       Year = as.integer(Year),
       Name = as.character(Name),
@@ -67,7 +65,7 @@ df2 <- clean_data(cb_10M_2006_2019_weather)
 df <- bind_rows(df1, df2)
 ```
 
-```{r}
+```{r, warning = FALSE}
 
 # fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
 df <- df %>%
@@ -99,11 +97,55 @@ df <- df %>%
 ```{r}
 # add final data to git repository
 # write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
+
 ```
 
+# Describing our Data
 
+| Variable Names | Data Type    | Variable Descriptions                      |
+|----------------|--------------|--------------------------------------------|
+| Year           | Integer      | Year the race was held.                    |
+| Name           | Character    | First and last name of runner.             |
+| Age            | Integer      | Age of runner at time of race. He          |
+| Time           | Time/Numeric | Time in hr:min:sec format to run 10 miles. |
+| Division       | Character    |                                            |
+| pos_by_sex     | Integer      |                                            |
+| total_by_sex   | Integer      |                                            |
+| Sex            | Character    | Gender of runner.                          |
+| PRCP           | Numeric      |                                            |
+| TMAX           | Integer      | Temperature maximum for the race day       |
+| TMIN           | Integer      | Temperature minimum for the race day       |
+
+## Dataset Overview:
+
+In the original data set we have 347402 rows and 17 columns. After cleaning the data set we ended up with 339934 rows and 11 columns. 7468 rows of data were omitted from the data we used because they had missing values for the time and/or age variables. Below is the description of the variables and data we excluded for our data analysis/visualization:
+
+| What was excluded | Reason for exclusion |
+|-------------------|----------------------|
+| Hometown          |                      |
+| Distance          |                      |
+| Date              |                      |
+| pos_by_div        |                      |
+| total_by_division |                      |
+| Pace              |                      |
+| Year 1977?        |                      |
+
+## Summary Statistics:
+
+Year, Age, Time, Sex main variables to focus on.
+
+Checklist for this section:
+
+summary stats: mean, median, mode, range, sd, percentiles, distributions by sex variable, etc.
+
+mention how many women and how many men in each year and overall
+
+```{r}
+
+```
 
 These were helping me evaluate the data cleaning, we can fix or replace them later
+
 ```{r}
 # Function to create histogram and density plot pairs for different years
 plot_histogram_density <- function(plot_year, cleaned_data) {
