@@ -18,7 +18,6 @@ With our data visualization we are determining the association between age and f
 
 ```{r, message = F, echo=FALSE}
 # load packages
-library(tinytex)
 library(dplyr)
 library(ggplot2)
 library(chron)
@@ -27,6 +26,7 @@ library(purrr)
 library(RColorBrewer)
 library(readr)
 library(ggridges)
+library(summarytools)
 ```
 
 ```{r, warning = FALSE, echo=FALSE}
@@ -145,8 +145,27 @@ summary stats: mean, median, mode, range, sd, percentiles, distributions by sex 
 
 mention how many women and how many men in each year and overall
 
-```{r}
-summary.data.frame(df)
+```{r descriptive_stats, results="asis", warning=FALSE}
+
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% 
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% group_by(Sex) %>%
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
+#view(dfSummary(df))
 ```
 
 These were helping me evaluate the data cleaning, we can fix or replace them later
@@ -168,7 +187,7 @@ tick_labels <- as.numeric(tick_positions)
 #          yaxis = list(showticklabels = FALSE, side = "left"))
 ```
 
-```{r}
+```{r density plot, echo=FALSE, warning=FALSE}
   
  plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
     geom_density_ridges_gradient(
@@ -178,7 +197,8 @@ tick_labels <- as.numeric(tick_positions)
       colours = c("#0D0887FF", "#CC4678FF", "#F0F921FF"),
       name = "Age"
     ) +
-    labs(title = 'Age Distribution by Year', y="")
+    labs(title = 'Age Distribution by Year', y="")+
+  facet_wrap(~Sex)
   
 plot_age_dist  
   # Plotting density ridgeline plot for Time by Year
@@ -190,11 +210,21 @@ plot_age_dist
       colours = c("red", "purple", "blue"),
       name = "Time to finish"
     ) +
-    labs(title = 'Time Distribution by Year', y = "")
+    labs(title = 'Time Distribution by Year', y = "")+
+  facet_wrap(~Sex)
+ 
  plot_time_dist 
+ 
+ 
+ # ggplot(data = df, aes(x = Age, y = as.factor(Year))) +
+ #  geom_boxplot() +
+ #  labs(x="Age", y="Year") +
+ #  theme_bw()
 ```
 
 
+```{r scatterplots}
 
+```
 
 
