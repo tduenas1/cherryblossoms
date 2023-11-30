@@ -263,6 +263,7 @@ for (curr_year in unique(df$Year)) {
   print(scat_plot(curr_year, df))
 }
 
+
 ```
 
 ```{r}
