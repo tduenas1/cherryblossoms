@@ -151,7 +151,6 @@ mention how many women and how many men in each year and overall
 summary.data.frame(df)
 ```
 
-These were helping me evaluate the data cleaning, we can fix or replace them later
 
 ```{r, echo=FALSE}
 x <- df$Time
@@ -182,7 +181,12 @@ tick_labels <- as.numeric(tick_positions)
     ) +
     labs(title = 'Age Distribution by Year', y="")
   
-plot_age_dist  
+plot_age_dist
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+
   # Plotting density ridgeline plot for Time by Year
  plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
     geom_density_ridges_gradient(
@@ -190,47 +194,40 @@ plot_age_dist
     ) +
     scale_fill_gradientn(
       colours = c("red", "purple", "blue"),
-      name = "Time to finish"
+      name = "Time to finish",
+      breaks = tick_positions,
+      labels = custom_ticks
+    ) +
+   scale_x_continuous(labels = tick_labels, breaks = tick_positions
     ) +
     labs(title = 'Time Distribution by Year', y = "")
- plot_time_dist 
+
+ plot_time_dist
 ```
 
 ```{r}
 # Creating a scatterplot function that inputs the current year and data and
 # outputs scatterplot for the year and its trend line
-scat_plot <- function(curr_year, df)
-{
 
+scat_plot <- function(curr_year, df) {
   # Subsetting data by given year
   sub_data <- df %>% filter(Year == curr_year)
   
-  # Scatterplot of age vs time 
-  plot(sub_data$Time ~ sub_data$Age,
-       main = curr_year,
-       xlab = "Age (years)",
-       ylab = "Time (hh:mm)",
-       yaxt = "n",
-       xlim = c(0, 80)
-  )
-  
-  # Plots the trendline
-  abline(lm(sub_data$Time ~ sub_data$Age), col = "red")
-
-  # Custom y-axis labels displayed as time
-  custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
-  tick_positions <- seq(min(sub_data$Time), max(sub_data$Time), length.out = length(custom_ticks))
-  axis(2, at = tick_positions, labels = custom_ticks, las = 2)
+  # Scatterplot using ggplot2
+  ggplot(sub_data, aes(x = Age, y = as.numeric(Time))) +
+    geom_point(col = "blue", shape = 1) +
+    geom_smooth(method = "lm", se = FALSE, col = "red") +
+    labs(title = as.character(curr_year), x = "Age (years)", y = "Time (hh:mm)") +
+    scale_y_continuous(labels = custom_ticks, breaks = tick_positions)
 }
 
-# Creates a 2x4 matrix layout for plots
+# Setting up the layout
 par(mfrow = c(2, 4))
 
-# Loops over years 1973:1982 and calls function scat_plot to 
-# generate scatterplot and trendline
-for (curr_year in 1973:2019)
-{
-  scat_plot(curr_year, df)
+# Loops over years 1973:2019 and calls the scat_plot function
+# unique(Year) skips 1977 and will work still work if we remove other years
+for (curr_year in unique(df$Year)) {
+  print(scat_plot(curr_year, df))
 }
 
 ```
