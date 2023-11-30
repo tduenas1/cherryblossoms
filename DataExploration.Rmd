@@ -1,9 +1,7 @@
 ---
-title: "Data Visualization"
-author: "Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser"
-output:
-pdf_document: default
-html_document: default
+title: "Data Exploration"
+output: pdf_document
+date: "2023-11-30"
 ---
 
 ```{r setup, include=FALSE}
