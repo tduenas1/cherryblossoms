@@ -1,6 +1,8 @@
 ---
 title: "Data Visualization"
-output: rmdformats::material
+#output: rmdformats::material
+author: Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -9,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 3DS : Cherry Blossom
 
-## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+### Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
 
 With our data visualization we are determining the association between age and fitness based on running data from the Cherry Blossom Ten-mile Run held in Washington DC from 1973 to 2020.
 
 # Loading and Cleaning Data
 
-```{r, message = F}
+```{r, message = F, echo=FALSE}
 # load packages
 library(dplyr)
 library(ggplot2)
@@ -24,9 +26,10 @@ library(plotly)
 library(purrr)
 library(RColorBrewer)
 library(readr)
+  library(ggridges)
 ```
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, echo=FALSE}
 
 cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", show_col_types = FALSE)
 
@@ -65,7 +68,7 @@ df2 <- clean_data(cb_10M_2006_2019_weather)
 df <- bind_rows(df1, df2)
 ```
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, echo=FALSE}
 
 # fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
 df <- df %>%
@@ -96,7 +99,7 @@ df <- df %>%
 
 ```
 
-```{r}
+```{r, echo=FALSE}
 # add final data to git repository
 # write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
 
@@ -110,7 +113,7 @@ df <- df %>%
 | Name           | Character    | First and last name of runner.             |
 | Age            | Integer      | Age of runner at time of race. He          |
 | Time           | Time/Numeric | Time in hr:min:sec format to run 10 miles. |
-| Division       | Character    |                                            |
+| Division       | Character    | Groupings based on age and gender.         |
 | pos_by_sex     | Integer      |                                            |
 | total_by_sex   | Integer      |                                            |
 | Sex            | Character    | Gender of runner.                          |
@@ -143,12 +146,12 @@ summary stats: mean, median, mode, range, sd, percentiles, distributions by sex 
 mention how many women and how many men in each year and overall
 
 ```{r}
-
+summary.data.frame(df)
 ```
 
 These were helping me evaluate the data cleaning, we can fix or replace them later
 
-```{r}
+```{r, echo=FALSE}
 x <- df$Time
 fit <- density(x)
 
@@ -164,3 +167,29 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
          yaxis2 = list(title = "Density", showline = TRUE, overlaying = "y"),
          yaxis = list(showticklabels = FALSE, side = "left"))
 ```
+
+```{r}
+  
+ plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("#0D0887FF", "#CC4678FF", "#F0F921FF"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")
+  
+plot_age_dist  
+  # Plotting density ridgeline plot for Time by Year
+ plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Time to finish"
+    ) +
+    labs(title = 'Time Distribution by Year', y = "")
+ plot_time_dist 
+ 
