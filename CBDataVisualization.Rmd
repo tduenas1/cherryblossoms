@@ -1,6 +1,9 @@
 ---
 title: "Data Visualization"
-output: rmdformats::material
+author: "Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser"
+output:
+pdf_document: default
+html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -9,14 +12,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 3DS : Cherry Blossom
 
-## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+### Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
 
 With our data visualization we are determining the association between age and fitness based on running data from the Cherry Blossom Ten-mile Run held in Washington DC from 1973 to 2020.
 
 # Loading and Cleaning Data
 
-```{r, message = F}
+```{r, message = F, echo=FALSE}
 # load packages
+library(tinytex)
 library(dplyr)
 library(ggplot2)
 library(chron)
@@ -24,9 +28,10 @@ library(plotly)
 library(purrr)
 library(RColorBrewer)
 library(readr)
+library(ggridges)
 ```
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, echo=FALSE}
 
 cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", show_col_types = FALSE)
 
@@ -65,7 +70,7 @@ df2 <- clean_data(cb_10M_2006_2019_weather)
 df <- bind_rows(df1, df2)
 ```
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, echo=FALSE}
 
 # fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
 df <- df %>%
@@ -96,7 +101,7 @@ df <- df %>%
 
 ```
 
-```{r}
+```{r, echo=FALSE}
 # add final data to git repository
 # write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
 
@@ -105,6 +110,7 @@ unique(df$Division)
 
 # Describing our Data
 
+<<<<<<< HEAD
 +----------------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Variable Names | Data Type    | Variable Descriptions                                                                                                                                                                                                                                             |
 +================+==============+===================================================================================================================================================================================================================================================================+
@@ -134,6 +140,21 @@ unique(df$Division)
 +----------------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | TMIN           | Integer      | Maximum daily temperature recorded in Fahrenheit, collected by NOAA                                                                                                                                                                                               |
 +----------------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+=======
+| Variable Names | Data Type    | Variable Descriptions                      |
+|----------------|--------------|--------------------------------------------|
+| Year           | Integer      | Year the race was held.                    |
+| Name           | Character    | First and last name of runner.             |
+| Age            | Integer      | Age of runner at time of race. He          |
+| Time           | Time/Numeric | Time in hr:min:sec format to run 10 miles. |
+| Division       | Character    | Groupings based on age and gender.         |
+| pos_by_sex     | Integer      |                                            |
+| total_by_sex   | Integer      |                                            |
+| Sex            | Character    | Gender of runner.                          |
+| PRCP           | Numeric      |                                            |
+| TMAX           | Integer      | Temperature maximum for the race day       |
+| TMIN           | Integer      | Temperature minimum for the race day       |
+>>>>>>> 70cad8d358d80d714587be8d5a55e1cf6830e8d8
 
 ## Dataset Overview:
 
@@ -160,12 +181,12 @@ summary stats: mean, median, mode, range, sd, percentiles, distributions by sex 
 mention how many women and how many men in each year and overall
 
 ```{r}
-
+summary.data.frame(df)
 ```
 
 These were helping me evaluate the data cleaning, we can fix or replace them later
 
-```{r}
+```{r, echo=FALSE}
 x <- df$Time
 fit <- density(x)
 
@@ -173,11 +194,89 @@ custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
 tick_positions <- seq(min(x), max(x), length.out = length(custom_ticks))
 tick_labels <- as.numeric(tick_positions)
 
-plot_ly(x = x, type = "histogram", name = "Histogram") %>% 
-  add_trace(x = fit$x, y = fit$y, type = "scatter", mode = "lines", fill = "tozeroy", yaxis = "y2", name = "Density Curve") %>% 
-  layout(title = "Distribution and Density Curve \n All Years",
-         xaxis = list(title = "Time (hr:min)", showline = TRUE, 
-                      tickvals = tick_positions, ticktext = custom_ticks),         
-         yaxis2 = list(title = "Density", showline = TRUE, overlaying = "y"),
-         yaxis = list(showticklabels = FALSE, side = "left"))
+# plot_ly(x = x, type = "histogram", name = "Histogram") %>% 
+#   add_trace(x = fit$x, y = fit$y, type = "scatter", mode = "lines", fill = "tozeroy", yaxis = "y2", name = "Density Curve") %>% 
+#   layout(title = "Distribution and Density Curve \n All Years",
+#          xaxis = list(title = "Time (hr:min)", showline = TRUE, 
+#                       tickvals = tick_positions, ticktext = custom_ticks),         
+#          yaxis2 = list(title = "Density", showline = TRUE, overlaying = "y"),
+#          yaxis = list(showticklabels = FALSE, side = "left"))
 ```
+
+```{r}
+  
+ plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("#0D0887FF", "#CC4678FF", "#F0F921FF"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")
+  
+plot_age_dist  
+  # Plotting density ridgeline plot for Time by Year
+ plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Time to finish"
+    ) +
+    labs(title = 'Time Distribution by Year', y = "")
+ plot_time_dist 
+```
+
+```{r}
+# Creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and its trend line
+scat_plot <- function(curr_year, df)
+{
+
+  # Subsetting data by given year
+  sub_data <- df %>% filter(Year == curr_year)
+  
+  # Scatterplot of age vs time 
+  plot(sub_data$Time ~ sub_data$Age,
+       main = curr_year,
+       xlab = "Age (years)",
+       ylab = "Time (hh:mm)",
+       yaxt = "n",
+       xlim = c(0, 80)
+  )
+  
+  # Plots the trendline
+  abline(lm(sub_data$Time ~ sub_data$Age), col = "red")
+
+  # Custom y-axis labels displayed as time
+  custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+  tick_positions <- seq(min(sub_data$Time), max(sub_data$Time), length.out = length(custom_ticks))
+  axis(2, at = tick_positions, labels = custom_ticks, las = 2)
+}
+
+# Creates a 2x4 matrix layout for plots
+par(mfrow = c(2, 4))
+
+# Loops over years 1973:1982 and calls function scat_plot to 
+# generate scatterplot and trendline
+for (curr_year in 1973:2019)
+{
+  scat_plot(curr_year, df)
+}
+
+```
+
+```{r}
+df %>%
+  ggplot() +
+  geom_point(aes(x = Age, y = Time)) + 
+  facet_wrap(~Sex) 
+
+```
+
+
+
+
+

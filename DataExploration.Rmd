@@ -1,0 +1,230 @@
+---
+title: "Data Exploration"
+output: pdf_document
+date: "2023-11-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 3DS : Cherry Blossom
+
+### Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+
+With our data visualization we are determining the association between age and fitness based on running data from the Cherry Blossom Ten-mile Run held in Washington DC from 1973 to 2020.
+
+# Loading and Cleaning Data
+
+```{r, message = F, echo=FALSE}
+# load packages
+library(dplyr)
+library(ggplot2)
+library(chron)
+library(plotly)
+library(purrr)
+library(RColorBrewer)
+library(readr)
+library(ggridges)
+library(summarytools)
+```
+
+```{r, warning = FALSE, echo=FALSE}
+
+cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", show_col_types = FALSE)
+
+cb_10M_2006_2019_weather <- read_csv("cb_10M_2006_2019_weather.csv", show_col_types = FALSE)
+
+clean_data <- function(df) {
+  df <- dplyr::select(df, Year, Name, Age, 
+               Time, Division, pos_by_sex, 
+               total_by_sex, Sex, PRCP, TMAX, TMIN)
+
+  df$Age[df$Age == 'NR'] <- 0
+  df$Time[df$Time == 'NR'] <- 0
+
+df <- df %>%
+    mutate(
+      Year = as.integer(Year),
+      Name = as.character(Name),
+      Age = as.integer(Age, na.rm = TRUE),
+      Time = as.character(Time),
+      Division = as.character(Division),
+      pos_by_sex = as.integer(pos_by_sex),
+      total_by_sex = as.integer(total_by_sex),
+      Sex = as.character(Sex),
+      PRCP = as.numeric(PRCP),
+      TMAX = as.integer(TMAX),
+      TMIN = as.integer(TMIN)
+    )
+  
+  return(df)
+}
+
+df1 <- clean_data(cb_10M_1973_2005_weather)
+df2 <- clean_data(cb_10M_2006_2019_weather)
+
+
+df <- bind_rows(df1, df2)
+```
+
+```{r, warning = FALSE, echo=FALSE}
+
+# fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
+df <- df %>%
+  mutate(
+    Time = ifelse(
+      Time >= "43:00:00" & Time <= "59:59:59",
+      paste0("00:", substr(Time, 1, 2), ":", substr(Time, 4, 5)),
+      Time
+    )
+  )
+
+
+df <- df %>%
+  filter(!is.na(Time) & Time != "" & Time != "00:00:00") %>%
+  mutate(Time = chron::times(Time)) %>%
+  filter(!is.na(Time)) %>%
+  filter(Time >= "00:43:00" & Time <= "02:20:00") %>%
+  filter(Age >= 8 & Age <= 87) %>%
+  filter(Year != 1977) %>%
+  filter(Year != 1973) %>%
+  mutate(
+    # replaces 'W' with 'F' in sex col
+    Sex = ifelse(Sex == 'W', 'F', Sex),
+    # correction for missing values by first character in division
+    Sex = ifelse(substr(Division, 1, 1) == 'W', 'F', Sex),
+    Sex = ifelse(substr(Division, 1, 1) == 'M', 'M', Sex)
+  )
+
+```
+
+```{r, echo=FALSE}
+# add final data to git repository
+# write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
+
+```
+
+# Describing our Data
+
+| Variable Names | Data Type    | Variable Descriptions                      |
+|----------------|--------------|--------------------------------------------|
+| Year           | Integer      | Year the race was held.                    |
+| Name           | Character    | First and last name of runner.             |
+| Age            | Integer      | Age of runner at time of race. He          |
+| Time           | Time/Numeric | Time in hr:min:sec format to run 10 miles. |
+| Division       | Character    | Groupings based on age and gender.         |
+| pos_by_sex     | Integer      |                                            |
+| total_by_sex   | Integer      |                                            |
+| Sex            | Character    | Gender of runner.                          |
+| PRCP           | Numeric      |                                            |
+| TMAX           | Integer      | Temperature maximum for the race day       |
+| TMIN           | Integer      | Temperature minimum for the race day       |
+
+## Dataset Overview:
+
+In the original data set we have 347402 rows and 17 columns. After cleaning the data set we ended up with 339934 rows and 11 columns. 7468 rows of data were omitted from the data we used because they had missing values for the time and/or age variables. Below is the description of the variables and data we excluded for our data analysis/visualization:
+
+| What was excluded | Reason for exclusion |
+|-------------------|----------------------|
+| Hometown          |                      |
+| Distance          |                      |
+| Date              |                      |
+| pos_by_div        |                      |
+| total_by_division |                      |
+| Pace              |                      |
+| Year 1977?        |                      |
+
+## Summary Statistics:
+
+Year, Age, Time, Sex main variables to focus on.
+
+Checklist for this section:
+
+summary stats: mean, median, mode, range, sd, percentiles, distributions by sex variable, etc.
+
+mention how many women and how many men in each year and overall
+
+```{r descriptive_stats, results="asis", warning=FALSE}
+
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% 
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% group_by(Sex) %>%
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
+#view(dfSummary(df))
+```
+
+These were helping me evaluate the data cleaning, we can fix or replace them later
+
+```{r, echo=FALSE}
+x <- df$Time
+fit <- density(x)
+
+custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+tick_positions <- seq(min(x), max(x), length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+# plot_ly(x = x, type = "histogram", name = "Histogram") %>% 
+#   add_trace(x = fit$x, y = fit$y, type = "scatter", mode = "lines", fill = "tozeroy", yaxis = "y2", name = "Density Curve") %>% 
+#   layout(title = "Distribution and Density Curve \n All Years",
+#          xaxis = list(title = "Time (hr:min)", showline = TRUE, 
+#                       tickvals = tick_positions, ticktext = custom_ticks),         
+#          yaxis2 = list(title = "Density", showline = TRUE, overlaying = "y"),
+#          yaxis = list(showticklabels = FALSE, side = "left"))
+```
+
+```{r density plot, echo=FALSE, warning=FALSE}
+  
+ plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("#0D0887FF", "#CC4678FF", "#F0F921FF"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")+
+  facet_wrap(~Sex)
+  
+plot_age_dist  
+  # Plotting density ridgeline plot for Time by Year
+ plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 3, size = 0.3
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Time to finish"
+    ) +
+    labs(title = 'Time Distribution by Year', y = "")+
+  facet_wrap(~Sex)
+ 
+ plot_time_dist 
+ 
+ 
+ # ggplot(data = df, aes(x = Age, y = as.factor(Year))) +
+ #  geom_boxplot() +
+ #  labs(x="Age", y="Year") +
+ #  theme_bw()
+```
+
+
+```{r scatterplots}
+
+```
+
+
