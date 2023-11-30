@@ -284,10 +284,23 @@ for (curr_year in unique(df$Year)) {
 
 ```
 
-```{r}
-df %>%
-  ggplot() +
-  geom_point(aes(x = Age, y = Time)) + 
-  facet_wrap(~Sex) 
+```{r scatterplot by year, echo=FALSE, warning=FALSE, fig.dim = c(8, 16)}
 
+#splitting time to seconds
+ time_components <- strsplit(as.character(df$Time), ":")
+ df$Time_in_seconds <- sapply(time_components, function(x) {
+   as.numeric(x[1]) * 3600 + as.numeric(x[2]) * 60 + as.numeric(x[3])
+ })
+
+# Convert 'Time_in_seconds' back to "hh:mm" format for y-axis labels
+df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, (df$Time_in_seconds %% 3600) %/% 60)
+
+#scatterplot of Age vs Time all data 
+ggplot(df,aes(x=Age, y=Time_in_seconds))+
+  geom_point(alpha= 0.1, color="purple", size = .5)+
+  labs(title = "Age vs Time scatterplot", y="")+
+  geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
+  scale_y_continuous(labels = function(x) as.character(hms(seconds = x), format = "%H:%M")) +
+  theme_bw()+
+  facet_wrap(~as.factor(Year),ncol = 5)
 ```
