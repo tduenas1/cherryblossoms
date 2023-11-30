@@ -196,6 +196,53 @@ plot_age_dist
  plot_time_dist 
 ```
 
+```{r}
+# Creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and its trend line
+scat_plot <- function(curr_year, df)
+{
+
+  # Subsetting data by given year
+  sub_data <- df %>% filter(Year == curr_year)
+  
+  # Scatterplot of age vs time 
+  plot(sub_data$Time ~ sub_data$Age,
+       main = curr_year,
+       xlab = "Age (years)",
+       ylab = "Time (hh:mm)",
+       yaxt = "n",
+       xlim = c(0, 80)
+  )
+  
+  # Plots the trendline
+  abline(lm(sub_data$Time ~ sub_data$Age), col = "red")
+
+  # Custom y-axis labels displayed as time
+  custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+  tick_positions <- seq(min(sub_data$Time), max(sub_data$Time), length.out = length(custom_ticks))
+  axis(2, at = tick_positions, labels = custom_ticks, las = 2)
+}
+
+# Creates a 2x4 matrix layout for plots
+par(mfrow = c(2, 4))
+
+# Loops over years 1973:1982 and calls function scat_plot to 
+# generate scatterplot and trendline
+for (curr_year in 1973:2019)
+{
+  scat_plot(curr_year, df)
+}
+
+```
+
+```{r}
+df %>%
+  ggplot() +
+  geom_point(aes(x = Age, y = Time)) + 
+  facet_wrap(~Sex) 
+
+```
+
 
 
 
