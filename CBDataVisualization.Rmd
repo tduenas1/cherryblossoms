@@ -21,7 +21,7 @@ The Credit Union Cherry Blossom (CUCB) is a non-profit organization that runs an
 
 **Data Extraction Method:**
 
-We created a Jupyter notebook to conduct the data scraping from the webpage: \<<https://www.cballtimeresults.org/performance-search/?eventType=10M&year=1973&division=M&page=1>\>. The Python library \"requests\" was used to connect to the URL, and \"BeatifulSoup\" was used to parse through the HTML and extract the data. We wrote a function that iterated through the specified variables (section, division, year, and page) to ensure all the data was collected. The CUCB website contains data for the following columns: Name, PiD/TiD, PiS/TiS, Age, Time, Pace, Division, and Home Town. The data was scraped for men and women between 1973 and 2019. 1973 was the first year the event was held, and 2019 was the year before organizers canceled the event for the first time due to COVID-19.
+We created a Jupyter notebook to conduct the data scraping from the webpage: \<<https://www.cballtimeresults.org/performance-search/?eventType=10M&year=1973&division=M&page=1>\>. The Python library "requests" was used to connect to the URL, and "BeatifulSoup" was used to parse through the HTML and extract the data. We wrote a function that iterated through the specified variables (section, division, year, and page) to ensure all the data was collected. The CUCB website contains data for the following columns: Name, PiD/TiD, PiS/TiS, Age, Time, Pace, Division, and Home Town. The data was scraped for men and women between 1973 and 2019. 1973 was the first year the event was held, and 2019 was the year before organizers canceled the event for the first time due to COVID-19.
 
 We incorporated weather data from the National Oceanic and Atmospheric Administration (NOAA) and the National Centers for Environmental Information. The closest option to the marathon was the Washington Reagon Airport, Arlington, VA, situated on the banks of the Potomac across from the National Mall, where most of the marathon takes place. From that data set, we added precipitation and minimum and maximum temperatures for each day the race took place. Each event date was manually recorded from the Rite of Spring pdf that detailed the history of the marathon and used to join only the relevant data for each event date.
 
@@ -93,6 +93,8 @@ library(purrr)
 library(RColorBrewer)
 library(readr)
 library(ggridges)
+library(hms)
+library(summarytools)
 ```
 
 ```{r, warning = FALSE, echo=FALSE}
@@ -181,8 +183,25 @@ summary stats: mean, median, mode, range, sd, percentiles, distributions by sex 
 
 mention how many women and how many men in each year and overall
 
-```{r}
-summary.data.frame(df)
+```{r descriptive_stats, results="asis", warning=FALSE, echo=FALSE}
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% 
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
+df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% group_by(Sex) %>%
+dfSummary(
+          varnumbers = FALSE,
+          plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75,  
+          valid.col    = FALSE,
+          tmp.img.dir  = "/tmp")
+
 ```
 
 ```{r, echo=FALSE}
