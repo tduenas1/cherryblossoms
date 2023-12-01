@@ -701,6 +701,19 @@ ggplot(df,aes(x=Age, y=Time_in_seconds))+
 
 Looking at our scatterplots, we can see that the time to run the race increases with age, although not by that much. This is very useful for our analysis, since we are trying to determie whether the fitness of individuals goes down as one ages. Taking the trend lines of the scatter plots above, we can see that there is a trend of decreasing fitness with age.
 
+```{r}
+ggplot(df,aes(x=Age, y=Time_in_seconds))+
+  geom_point(alpha= 0.1, color="purple", size = .5)+
+  labs(title = "Age vs Time scatterplots (seperated by sex)", y="Time (hr:min:sec)")+
+  geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
+  scale_y_continuous(labels = function(x) as.character(hms(seconds = x), 
+  format = "%H:%M")) +
+  theme_bw()+
+  facet_wrap(~as.factor(Sex))
+
+```
+In this graph we seperate the two sexes males and females. We look at the overall Time and Age of each participant over the years. We can see they both have the pattern of time increasing with age. Between both sexes performance decreases as the age of the participants increase. 
+
 ### Model Fitting
 
 We would also like to fit a model to see if there is a relationship between age, gender and weather conditions on the performance of runners in the CUCB run. We found that the best indicator for the performance in the race is gender followed by age and weather conditions.
