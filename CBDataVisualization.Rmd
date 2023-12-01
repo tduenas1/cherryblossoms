@@ -215,13 +215,7 @@ df <- df %>%
 
 ## Summary Statistics:
 
-Year, Age, Time, Sex main variables to focus on.
-
-Checklist for this section:
-
-summary stats: mean, median, mode, range, sd, percentiles, distributions by sex variable, etc.
-
-mention how many women and how many men in each year and overall
+The summary tables below represent detailed statistics of our data comprising 339214 rows .The variables include **Year** ranging from 1974 to 2019, for 45 distinct years. **Age** ranges from 8 to 87 years, with a mean of 36.6. **Time** taken varies from 00:43:20 to 02:20:00, with quartiles at 01:19:35, 01:30:50, and 01:42:22. **Sex** includes two categories: Female, **F** and Male, **M**, which are almost evenly distributed. Precipitation, **PRCP**, values span from 0.00inches to 0.93in, while maximum temperatures, **TMAX,** ranges from $44.0^{\circ} F$ to $84.0^{\circ} F$, and minimum temperatures, TMIN, from $32.00^{\circ} F$ to $58.00^{\circ} F$. When grouped by, **Sex**, for females, **F,** it shows a mean **Year** of 2009.2 while for male, 'M' it shows a mean **Year** of 2003.7. The **Age** distributions for females, **F**, and males, **M** reveal similar ranges and distributions, with females, **F,** slightly younger on average compared to males, **M**.
 
 ```{r descriptive_stats, results="asis", warning=FALSE, echo=FALSE}
 df  %>% select(Year, Age, Time, Sex, PRCP, TMAX, TMIN) %>% 
@@ -244,6 +238,11 @@ dfSummary(
 
 ```
 
+
+### Exploring Data
+
+#### Age Density Distribution Plots 
+
 ```{r, echo=FALSE}
 x <- df$Age
 fit <- density(x)
@@ -257,7 +256,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Distribution and Density Curve \n All Years",
+    title = "Age Density Distribution Curve for \n All Years",
     xaxis = list(
       title = "Age (Years)",
       showline = TRUE
@@ -276,6 +275,27 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 # config settings turn of interactive features of plotly for
 ```
 
+```{r age ridgeline density plot, echo=FALSE, warning=FALSE }
+  
+plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 8, size = 0.1
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")
+  
+plot_age_dist
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+```
+
+#### Time Density Distribution Curve 
+
 ```{r, echo=FALSE}
 x <- df$Time
 fit <- density(x)
@@ -293,7 +313,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Distribution and Density Curve \n All Years",
+    title = "Time Density Distribution Curve for \n All Years ",
     xaxis = list(
       title = "Time (hr:min)",
       showline = TRUE,
@@ -314,28 +334,13 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 # config settings turn of interactive features of plotly for
 ```
 
-```{r ridge line density plot, echo=FALSE, warning=FALSE }
-  
-plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
-    geom_density_ridges_gradient(
-      aes(fill = ..x..), scale = 3, size = 0.3
-    ) +
-    scale_fill_gradientn(
-      colours = c("#0D0887FF", "#CC4678FF", "#F0F921FF"),
-      name = "Age"
-    ) +
-    labs(title = 'Age Distribution by Year', y="")
-  
-plot_age_dist
 
-custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
-tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
-tick_labels <- times(tick_positions)
 
+```{r time ridgeline density plot, echo=FALSE, warning=FALSE }
   # Plotting density ridgeline plot for Time by Year
  plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
     geom_density_ridges_gradient(
-      aes(fill = ..x..), scale = 3, size = 0.3
+      aes(fill = ..x..), scale = 5, size = 0.1
     ) +
     scale_fill_gradientn(
       colours = c("red", "purple", "blue"),
