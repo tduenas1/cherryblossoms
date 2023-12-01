@@ -204,6 +204,40 @@ dfSummary(
 
 ```
 
+
+```{r, echo=FALSE}
+x <- df$Age
+fit <- density(x)
+
+plot_ly(x = x, type = "histogram", name = "Histogram") %>%
+  add_trace(
+    x = fit$x, y = fit$y,
+    type = "scatter", mode = "lines",
+    fill = "tozeroy", yaxis = "y2", name = "Density Curve",
+    line = list(color = "red"),  # Change the density curve line color here
+    fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
+  ) %>%
+  layout(
+    title = "Distribution and Density Curve \n All Years",
+    xaxis = list(
+      title = "Age (Years)",
+      showline = TRUE
+    ),
+    yaxis2 = list(
+      title = "Density",
+      showline = TRUE,
+      overlaying = "y"
+    ),
+    yaxis = list(
+      showticklabels = FALSE,
+      side = "left"
+    )
+  ) %>%
+  config(scrollZoom = FALSE, displayModeBar = FALSE, editable = FALSE)
+# config settings turn of interactive features of plotly for
+```
+
+
 ```{r, echo=FALSE}
 x <- df$Time
 fit <- density(x)
@@ -212,18 +246,42 @@ custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
 tick_positions <- seq(min(x), max(x), length.out = length(custom_ticks))
 tick_labels <- as.numeric(tick_positions)
 
-# plot_ly(x = x, type = "histogram", name = "Histogram") %>% 
-#   add_trace(x = fit$x, y = fit$y, type = "scatter", mode = "lines", fill = "tozeroy", yaxis = "y2", name = "Density Curve") %>% 
-#   layout(title = "Distribution and Density Curve \n All Years",
-#          xaxis = list(title = "Time (hr:min)", showline = TRUE, 
-#                       tickvals = tick_positions, ticktext = custom_ticks),         
-#          yaxis2 = list(title = "Density", showline = TRUE, overlaying = "y"),
-#          yaxis = list(showticklabels = FALSE, side = "left"))
+plot_ly(x = x, type = "histogram", name = "Histogram") %>%
+  add_trace(
+    x = fit$x, y = fit$y,
+    type = "scatter", mode = "lines",
+    fill = "tozeroy", yaxis = "y2", name = "Density Curve",
+    line = list(color = "red"),  # Change the density curve line color here
+    fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
+  ) %>%
+  layout(
+    title = "Distribution and Density Curve \n All Years",
+    xaxis = list(
+      title = "Time (hr:min)",
+      showline = TRUE,
+      tickvals = tick_positions,
+      ticktext = custom_ticks
+    ),
+    yaxis2 = list(
+      title = "Density",
+      showline = TRUE,
+      overlaying = "y"
+    ),
+    yaxis = list(
+      showticklabels = FALSE,
+      side = "left"
+    )
+  ) %>%
+  config(scrollZoom = FALSE, displayModeBar = FALSE, editable = FALSE)
+# config settings turn of interactive features of plotly for
 ```
+
+
+
 
 ```{r}
   
- plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
     geom_density_ridges_gradient(
       aes(fill = ..x..), scale = 3, size = 0.3
     ) +
@@ -257,32 +315,36 @@ tick_labels <- times(tick_positions)
  plot_time_dist
 ```
 
+
 ```{r}
+# Probalby not using this but saving the code in case we need a single scatter plot
+
 # Creating a scatterplot function that inputs the current year and data and
 # outputs scatterplot for the year and its trend line
 
-scat_plot <- function(curr_year, df) {
+#scat_plot <- function(curr_year, df) {
   # Subsetting data by given year
-  sub_data <- df %>% filter(Year == curr_year)
+#  sub_data <- df %>% filter(Year == curr_year)
   
   # Scatterplot using ggplot2
-  ggplot(sub_data, aes(x = Age, y = as.numeric(Time))) +
-    geom_point(col = "blue", shape = 1) +
-    geom_smooth(method = "lm", se = FALSE, col = "red") +
-    labs(title = as.character(curr_year), x = "Age (years)", y = "Time (hh:mm)") +
-    scale_y_continuous(labels = custom_ticks, breaks = tick_positions)
-}
+#  ggplot(sub_data, aes(x = Age, y = as.numeric(Time))) +
+#    geom_point(col = "blue", shape = 1) +
+#    geom_smooth(method = "lm", se = FALSE, col = "red") +
+#    labs(title = as.character(curr_year), x = "Age (years)", y = "Time (hh:mm)") +
+#    scale_y_continuous(labels = custom_ticks, breaks = tick_positions)
+#}
 
 # Setting up the layout
-par(mfrow = c(2, 4))
+#par(mfrow = c(2, 4))
 
 # Loops over years 1973:2019 and calls the scat_plot function
 # unique(Year) skips 1977 and will work still work if we remove other years
-for (curr_year in unique(df$Year)) {
-  print(scat_plot(curr_year, df))
-}
+#for (curr_year in unique(df$Year)) {
+#  print(scat_plot(curr_year, df))
+#}
 
 ```
+
 
 ```{r scatterplot by year, echo=FALSE, warning=FALSE, fig.dim = c(8, 16)}
 
@@ -298,7 +360,7 @@ df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, (df$Time_in_s
 #scatterplot of Age vs Time all data 
 ggplot(df,aes(x=Age, y=Time_in_seconds))+
   geom_point(alpha= 0.1, color="purple", size = .5)+
-  labs(title = "Age vs Time scatterplot", y="")+
+  labs(title = "Age vs Time scatterplots", y="Time (hr:min:sec)")+
   geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
   scale_y_continuous(labels = function(x) as.character(hms(seconds = x), format = "%H:%M")) +
   theme_bw()+
