@@ -478,3 +478,6 @@ ggplot(model, aes(x= .fitted, y= .resid))+
        y = "Residual Errors(seconds)", x="Fitted Values(seconds)")+
   theme_bw()
 ```
+#### Further Analysis of Linear Models
+
+For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance.
