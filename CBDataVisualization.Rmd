@@ -132,14 +132,11 @@ library(RColorBrewer)
 library(readr)
 library(ggridges)
 library(hms)
-<<<<<<< HEAD
 library(knitr)
-=======
 library(summarytools)
 library(GGally)
 library(olsrr)
 library(leaps)
->>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
 ```
 
 ```{r, warning = FALSE, echo=FALSE}
@@ -447,6 +444,7 @@ plot_age_dist
 custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
 tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
 tick_labels <- times(tick_positions)
+```
 
 
 
