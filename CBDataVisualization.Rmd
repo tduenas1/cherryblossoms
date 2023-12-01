@@ -366,6 +366,9 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 
 ```
 
+Examining from the collection of data from every year of the age groups that participated in the race. Looking at the graph we can see a large number of participants from the age of mid-20s to early 30s. The older the participant group is the lower the density as well as the groups beforehand.
+
+
 ```{r age ridgeline density plot, echo=FALSE, warning=FALSE }
   
 plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
@@ -384,6 +387,9 @@ custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
 tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
 tick_labels <- times(tick_positions)
 ```
+
+This graph examines the density of the age groups organized per year in a color gradient. As the years get up the density seems to be more condensed near the mid-20s to early 30s while the earlier years have a more spread out age ranges. 
+
 
 #### Time Density Distribution Curve 
 
@@ -426,6 +432,9 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 # config settings turn of interactive features of plotly for
 ```
 
+This density graph examines the spread of the times recorded of the participants. This graph shows that most participants finished 1-2 hours throughout the years. 
+
+
 ```{r time ridgeline density plot, echo=FALSE, warning=FALSE }
 
   # Plotting density ridgeline plot for Time by Year
@@ -445,6 +454,9 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 
  plot_time_dist
 ```
+
+This graph examines the density of the times that the participants finished the race throughout the years with a color gradiant to visualize the different years. The graph reveals that it was more condensed in finishing times in the earlier years but as years go on the time starts to vary more. 
+
 ### Scatterplot of Time (Performance) vs Age
 
 The scatterplot depicting age against the time taken to finish the race presents an intriguing relationship within the dataset. This visualization aims to uncover potential connections or disparities between age and race completion duration. Initial observation suggest of a scatterplot of the full dataset suggests that there might only be a minimal influence of age on the time taken to finish the race. 
