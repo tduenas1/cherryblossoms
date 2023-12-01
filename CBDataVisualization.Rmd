@@ -107,6 +107,18 @@ Below is the description of the variables and data we excluded/not used in our a
 |                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |                                               | We plan on doing this modification by finding the average pace for each runner in that year and multiplying that by 10 for each runner, giving us the race times for the runner for 10 miles. The same limitations and things should be taken into account for this new time as above. Our group decided it was best to modify this data then to remove it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 +-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+<<<<<<< HEAD
+=======
+
+# Challenges that occured
+## Problem with Data and biases/problem with application
+  While looking at the data we started to run into some problems. Looking at the history of the races and what went on during it could explain some of the data. A lot of these were covered in the data cleaning (as seen above). Some of the things that we encountered as well were weather patterns that caused changes to the data, the years that this happened were in 1982, 1984, 1987, 1988, 1992, 1996, 2000, 2004, and 2016. In 1982 winds were going 50 mph while 1988 had winds going 25 mph, 1992 had 30-35 mph winds, 2004 had 40 mph winds and 2016 had winds going at 47 mph, these winds slowed runners as they fought against the wind. Also in 1987, there was “favorable wind”. In 1984 there were flooding with 6 inches of flooding at one part of the race and similarly, in 1996 there were 100-yard puddles. Lastly with weather issues in 2000 there was snow before the race and it got extremely chilly and were slowed to almost a walk on the Memorial Bridge. We started to take these by importing weather data from the National Oceanic and Atmospheric Administration (NOAA) and the National Centers for Environmental Information.
+  Another outside issue that arose while looking at the history was the many times the route of the race was changed, as the courses changed throughout the years it could have changed the times that it took to complete the race. The first time the race changed was in 1993 and then again in 1999 which included many curves which slowed the times, then it changed again in 2003 due to the war in Iraq. In 2008 the course was changed and updated, and then in 2009 they used the same route but ran it in reverse. It was changed and rerouted once more in 2017. 
+  Another fact we found out that could’ve skewed the data was that in 2006 women started to start 10 minutes ahead of the men. This changes the data but to solve this issue we plan to separate the two sexes and look at the linear line separately to find if there is still a pattern between age and performance.
+  Lastly, as the times were analyzed it looked as if as the years went by there was a significant change in the finishing times in the top few. It was found out that The race first began as a small gathering of runners and originally as a precursor training run for elite runners planning to compete in the Boston Marathon. It has evolved over the years into a local race for runners of all abilities which skews the data as it becomes more prestigious and competitive. 
+Other than the outside forces that were found out from the race's history there was an issue with the formatting of a few graphs. While making the graphs they had automatic formatting at times that was inconsistent and hard to interpret. To fix this issue custom ticks were created to keep consistency. The times that were marked were 00:42, 01:13, 01:45, 02:17, and 02:49. 
+
+>>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
 
 # Loading and Cleaning Data
 
@@ -122,7 +134,14 @@ library(RColorBrewer)
 library(readr)
 library(ggridges)
 library(hms)
+<<<<<<< HEAD
 library(knitr)
+=======
+library(summarytools)
+library(GGally)
+library(olsrr)
+library(leaps)
+>>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
 ```
 
 ```{r, warning = FALSE, echo=FALSE}
@@ -208,17 +227,21 @@ df <- df %>% select(Year, Name, Age, Time, Division, Sex, PRCP, TMAX, TMIN)
 
 ```{r, echo=FALSE}
 # add final data to git repository
-# write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
+ write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
 
 ```
 
 ## Summary Statistics:
 
+<<<<<<< HEAD
 Year, Age, Time, Sex main variables to focus on.
 
 Checklist for this section:
 
 summary stats by age. Age groups: 1-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-90
+=======
+The summary tables below represent detailed statistics of our data comprising 339214 rows .The variables include **Year** ranging from 1974 to 2019, for 45 distinct years. **Age** ranges from 8 to 87 years, with a mean of 36.6. **Time** taken varies from 00:43:20 to 02:20:00, with quartiles at 01:19:35, 01:30:50, and 01:42:22. **Sex** includes two categories: Female, **F** and Male, **M**, which are almost evenly distributed. Precipitation, **PRCP**, values span from 0.00inches to 0.93in, while maximum temperatures, **TMAX,** ranges from $44.0^{\circ} F$ to $84.0^{\circ} F$, and minimum temperatures, TMIN, from $32.00^{\circ} F$ to $58.00^{\circ} F$. When grouped by, **Sex**, for females, **F,** it shows a mean **Year** of 2009.2 while for male, 'M' it shows a mean **Year** of 2003.7. The **Age** distributions for females, **F**, and males, **M** reveal similar ranges and distributions, with females, **F,** slightly younger on average compared to males, **M**.
+>>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
 
 ```{r descriptive_stats, results="asis", warning=FALSE, echo=FALSE}
 # df with titles for the below summary stats
@@ -317,6 +340,10 @@ Examining the weather during the days of the race, we can see that the average w
 
 During 26 of the race days, there was no rain, while 19 of the race days had rain.
 
+### Exploring Data
+
+#### Age Density Distribution Plots 
+
 ```{r, echo=FALSE}
 x <- df$Age
 fit <- density(x)
@@ -330,7 +357,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Distribution and Density Curve \n All Years",
+    title = "Age Density Distribution Curve for \n All Years",
     xaxis = list(
       title = "Age (Years)",
       showline = TRUE
@@ -348,7 +375,30 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
   config(scrollZoom = FALSE, displayModeBar = FALSE, editable = FALSE)
 # config settings turn of interactive features of plotly for
 
+<<<<<<< HEAD
 ```
+=======
+```{r age ridgeline density plot, echo=FALSE, warning=FALSE }
+  
+plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 8, size = 0.1
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")
+  
+plot_age_dist
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+```
+
+#### Time Density Distribution Curve 
+>>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
 
 ```{r, echo=FALSE}
 x <- df$Time
@@ -367,7 +417,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Distribution and Density Curve \n All Years",
+    title = "Time Density Distribution Curve for \n All Years ",
     xaxis = list(
       title = "Time (hr:min)",
       showline = TRUE,
@@ -388,6 +438,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 # config settings turn of interactive features of plotly for
 ```
 
+<<<<<<< HEAD
 ```{r}
   
 plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
@@ -406,10 +457,15 @@ custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
 tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
 tick_labels <- times(tick_positions)
 
+=======
+
+
+```{r time ridgeline density plot, echo=FALSE, warning=FALSE }
+>>>>>>> 81a00c27c8358ad5ee9c47c5a6327965d8360e8a
   # Plotting density ridgeline plot for Time by Year
  plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
     geom_density_ridges_gradient(
-      aes(fill = ..x..), scale = 3, size = 0.3
+      aes(fill = ..x..), scale = 5, size = 0.1
     ) +
     scale_fill_gradientn(
       colours = c("red", "purple", "blue"),
@@ -473,3 +529,80 @@ ggplot(df,aes(x=Age, y=Time_in_seconds))+
   theme_bw()+
   facet_wrap(~as.factor(Year),ncol = 5)
 ```
+
+### Model Fitting
+
+We would like to fit a model to see if there is a relationship between age, gender and weather conditions on the performance of runners in the CUCB run. We found that the best indicator for the performance in the race is gender followed by age and weather conditions.
+
+$$ Performance(Time) = \beta_0 + \beta_1 Sex + \beta_2 Age + \beta_3 Pecipitation + \beta_4 Man Temps + \beta_5 Min Temps
+$$
+
+The coefficient of determination $R^2 = 20.25\%$. $R^2$ tells us how much variability the above variables contribute to the performance. So from $R^2$ we can say that there we are missing around $80\%$ of the contributions to the performance that may or may not be recorded in the race data.
+
+```{r time to seconds, eval=FALSE, warning=FALSE, include=FALSE}
+
+#splitting time to seconds
+ time_components <- strsplit(as.character(df$Time), ":")
+ df$Time_in_seconds <- sapply(time_components, function(x) {
+   as.numeric(x[1]) * 3600 + as.numeric(x[2]) * 60 + as.numeric(x[3])
+ })
+
+# Convert 'Time_in_seconds' back to "hh:mm" format for y-axis labels
+df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, (df$Time_in_seconds %% 3600) %/% 60)
+```
+
+```{r eval=FALSE, include=FALSE}
+ggplot(df, aes(x=(pos_by_sex/total_by_sex), y = Time_in_seconds))+
+  geom_point(alpha = 0.2, color = "violet", size=0.5)
+```
+
+```{r finding the best subset, include=FALSE}
+best_subset <- regsubsets(Time_in_seconds ~ Age + Sex 
+                          + PRCP + TMAX + TMIN , data = df)
+summary(best_subset)
+
+```
+
+```{r include=FALSE}
+model <- lm(Time_in_seconds ~  Sex+ Age + PRCP + TMAX + TMIN , data = df)
+summary(model)
+
+
+```
+
+The fitted model takes the form:
+
+$$ Performance(Time) = 5044.28 -834.94 Sex + 16.81 Age -559.14 Pecipitation + 9.82 Man Temps -7.92 Min Temps
+$$
+
+We can see from the model that being being Female negatively effects the performance but so does weather factors like rain and minimum temperatures.
+
+#### Assumptions
+
+To fit a linear model we first need to make a few assumptions
+
+-   The relationship between $Y$ and $\beta$'s is linear.
+
+-   The errors are normally distributed. We can check this by plotting a normal Quantile-Quantile Plot
+
+```{r qqplot, echo=FALSE}
+ols_plot_resid_qq(model, print_plot = TRUE)
+```
+
+-   The errors are uncorrelated. But we see that it is not the case from the plot below.
+
+-   The errors have constant variance and zero mean.
+
+```{r res vs fit, echo=FALSE, warning=FALSE}
+#ols_plot_resid_fit(model, print_plot = TRUE)
+
+ggplot(model, aes(x= .fitted, y= .resid))+
+  geom_point(alpha = 0.1, color="violet", size = 0.5)+
+  geom_hline(yintercept = 0, color = "red")+
+  labs(title = "Residual Error vs Fitted Values",
+       y = "Residual Errors(seconds)", x="Fitted Values(seconds)")+
+  theme_bw()
+```
+#### Further Analysis of Linear Models
+
+For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance.
