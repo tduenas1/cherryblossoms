@@ -779,3 +779,7 @@ ggplot(model, aes(x= .fitted, y= .resid))+
 #### Further Analysis of Linear Models
 
 For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance. After the fix, we would be able to see more accurate model results. The model could potentially give us insight about the relationship between age and runner times/ fitness.
+
+# Concluding Thoughts
+
+Looking at all of the data visualization we have done, our next steps would focus on exploring the stats by age groups (divided by sex) and also the scatterplots. We plan to try extracting runners that ran several races and see if there is a difference with that trend as compared to individuals who only ran once (as in if the times change across an increasing age differently). We also want to try to bootstrap the different age groups and see if there is truly a difference between the ages and running times and then try to model it again. This data visualization helped us see what areas we need to focus on for our final analysis.
