@@ -1,5 +1,5 @@
 ---
-title: "Data Visualization"
+title: "Data Exploration"
 author: "Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser"
 output:
 pdf_document: default
@@ -11,42 +11,40 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 3DS : Cherry Blossom 10-Mile Race
 
-With our data visualization we are determining the association between age and fitness based on running data from the Cherry Blossom Ten-Mile Race held in Washington DC from 1973 to 2019.
-
 **Background:**
 
-The Credit Union Cherry Blossom (CUCB) is a non-profit organization that runs an annual 10-mile race in Washington, D.C. This race occurs the first Sunday of each April and contestants are admitted to run the race based on a lottery entry system. The lottery entry started in 1980 with 1977 being the first year that had to limit voluntary runners. Using the data collected from this race, we are exploring the relationship between aging and fitness.
+The Credit Union Cherry Blossom (CUCB) is a non-profit organization that manages an annual 10-mile race in Washington, D.C. This race occurs the first Sunday of each April and contestants are admitted to run the race based on a lottery entry system implemented in 1980. The race has rapidly grown in size with 1977 being the first year that had to limit voluntary runners. The race is currently filled with a diverse group of participants that features professional and amateur runners across different ages. Using the data collected from the CUCB website, we are exploring the relationship between age and fitness.
 
 **Data Extraction Method:**
 
 We created a Jupyter notebook to conduct the data scraping from the webpage: \<<https://www.cballtimeresults.org/performance-search/?eventType=10M&year=1973&division=M&page=1>\>. The Python library "requests" was used to connect to the URL, and "BeatifulSoup" was used to parse through the HTML and extract the data. We wrote a function that iterated through the specified variables (section, division, year, and page) to ensure all the data was collected. The CUCB website contains data for the following columns: Name, PiD/TiD, PiS/TiS, Age, Time, Pace, Division, and Home Town. The data was scraped for men and women between 1973 and 2019. 1973 was the first year the event was held, and 2019 was the year before organizers canceled the event for the first time due to COVID-19.
 
-We incorporated weather data from the National Oceanic and Atmospheric Administration (NOAA) and the National Centers for Environmental Information. The closest option to the marathon was the Washington Reagon Airport, Arlington, VA, situated on the banks of the Potomac across from the National Mall, where most of the marathon takes place. From that data set, we added precipitation and minimum and maximum temperatures for each day the race took place. Each event date was manually recorded from the Rite of Spring pdf that detailed the history of the marathon and used to join only the relevant data for each event date.
+We incorporated weather data from the National Oceanic and Atmospheric Administration (NOAA) and the National Centers for Environmental Information. The closest option to the marathon was the Washington Reagan Airport, Arlington, VA, situated on the banks of the Potomac across from the National Mall, where most of the marathon takes place. From that data set, we added precipitation and minimum and maximum temperatures for each day the race took place. Each event date was manually recorded from the Rite of Spring pdf that detailed the history of the marathon and used to join only the relevant data for each event date.
 
 # Describing our Data
 
 ## Dataset Overview:
 
-In the original data set we have 347402 rows and 17 columns. After cleaning the data set we ended up with 339934 rows and 17 columns (although we ended excluding 8 variables from it since we didn't use them, so we only worked with a data frame of 339934 rows and 9 variables). 7468 rows of data were omitted from the data we used because they had missing values for the time and/or age variables.
+In the original data set we have 347,402 rows and 17 columns. 8 of the variables were excluded due to their lack of relevance. After cleaning the date we ended up with a data frame of 339,934 rows and 9 variables). 7,468 rows of data were omitted from the data due to missing values for the time and/or age variables. Table 1 and table 2 show all of the variables we considered and worked with.
+
+Table 1: Variables
 
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Variable Names    | Data Types   | Variable Descriptions                                                                                                                                                                  | How does this variable contribute to project objectives?                                                                                                                                                                                                        |
 +===================+==============+========================================================================================================================================================================================+=================================================================================================================================================================================================================================================================+
-| Year              | Integer      | Year the race was held.                                                                                                                                                                | Data is spanned over several years giving us the ability to see how people who ran the race for multiple years changed in times. Also this contains data from a lot of years, giving us access to more data.                                                    |
+| Year              | Integer      | Year the race was held.                                                                                                                                                                | Data is spanned over several years giving us the ability to see how people who ran the race for multiple years changed in times.                                                                                                                                |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Date              | Character    | Date on which the race was held in year-month-day format.                                                                                                                              | Excluded. Look below for more information on why.                                                                                                                                                                                                               |
+| Date              | Character    | Date on which the race was held in year-month-day format.                                                                                                                              | Was used as a key to join the weather data                                                                                                                                                                                                                      |
 |                   |              |                                                                                                                                                                                        |                                                                                                                                                                                                                                                                 |
 |                   |              | example: 1973-04-01                                                                                                                                                                    |                                                                                                                                                                                                                                                                 |
-+-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Distance          | Character    | An alphanumeric character telling us that the race ran was "10M" 10 miles.                                                                                                             | Excluded. Look below for more information on why.                                                                                                                                                                                                               |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Name              | Character    | An individual's first and last name with varying formats. Most of the CUCB website results for names also list an 'M', 'F', or 'W' in parenthesis for the individual's sex.            | Used as a personal identifier source for each runner. We plan to use this variable in the future to find runners that ran several times and see how their run times changed. This will be done in our final project not necessarily in this data visualization. |
 |                   |              |                                                                                                                                                                                        |                                                                                                                                                                                                                                                                 |
 |                   |              | example: James Yenckel (M)                                                                                                                                                             |                                                                                                                                                                                                                                                                 |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Age               | Integer      | Age of runner at time of race.                                                                                                                                                         | One of our main variables. Gives us runner ages so we can see how performance differs across age ranges and whether younger people have better times.                                                                                                           |
+| Age               | Integer      | Age of runner at time of race.                                                                                                                                                         | One of our main variables used to see how performance differs across age ranges and whether younger people have better times.                                                                                                                                   |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Time              | Time/Numeric | Time in hr:min:sec format to run 10 miles. This is how long it took each runner to complete the race.                                                                                  | One of our main variables. Gives us the runner times so we can see how the times spread as age changes.                                                                                                                                                         |
+| Time              | Time/Numeric | Time in hr:min:sec format to run 10 miles. This is how long it took each runner to complete the race.                                                                                  | One of our main variables used as a metric of fitness. We are looking at the relationship between age and time                                                                                                                                                  |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Division          | Character    | 28 different divisions are contained, 14 in each sex. They range from 4 of\                                                                                                            | This variable is used to break data into age groups which we then use to draw conclusions about our question.                                                                                                                                                   |
 |                   |              | them having 20 year ranges, while the rest have 5 year ranges. Each division is an alphanumeric code separating competitors by sex and age. The example shows 25 to 29-year-old women. |                                                                                                                                                                                                                                                                 |
@@ -65,46 +63,44 @@ In the original data set we have 347402 rows and 17 columns. After cleaning the 
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Hometown          | Character    | Hometown of runner.                                                                                                                                                                    | Excluded. Look below for more information on why.                                                                                                                                                                                                               |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| PRCP              | Numeric      | Precipitation recorded as daily rainfall in inches to one decimal place collected by NOAA.                                                                                             | This variable does not contribute directly to our project objectives but it used to provide information about whether it rained the day of the race or not, and how much it rained.                                                                             |
+| PRCP              | Numeric      | Precipitation recorded as daily rainfall in inches to one decimal place collected by NOAA.                                                                                             | This variable does not contribute directly to our project objectives but we want to evaluate it as another predictor for running times along with other weather data.                                                                                           |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| TMIN              | Integer      | Minimum daily temperature recorded in Fahrenheit, collected by NOAA.                                                                                                                   | This variable does not contribute directly to our project objectives but it's used to provide information about the temperature minimum of the day of the race.                                                                                                 |
+| TMIN              | Integer      | Minimum daily temperature recorded in Fahrenheit, collected by NOAA.                                                                                                                   | This variable does not contribute directly to our project objectives but we want to evaluate it as another predictor for running times along with other weather data.                                                                                           |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| TMAX              | Integer      | Maximum daily temperature recorded in Fahrenheit, collected by NOAA                                                                                                                    | This variable does not contribute directly to our project objectives but it's used to provide information about the temperature maximum of the day of the race.                                                                                                 |
+| TMAX              | Integer      | Maximum daily temperature recorded in Fahrenheit, collected by NOAA                                                                                                                    | This variable does not contribute directly to our project objectives but we want to evaluate it as another predictor for running times along with other weather data.                                                                                           |
 +-------------------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is the description of the variables and data we excluded/not used in our analysis or modified for our data analysis/visualization:
+Table 2: Variables and Data Excluded from Analysis
 
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **What was excluded/modified**                | **Reason for exclusion/modification**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Hometown                                      | Many missing values and inconsistencies were found in the data entries. We found a few individuals reporting their hometown differently each time they ran the race or just reporting several at once. Due to this we decided to remove this variable from our analysis because there are no accurate conclusions that can be drawn. Also this is not a variable we could use to fulfill our main objective, so we chose to exclude it from our analysis.                                                                                                                                                                                                                                                                                                                                                                  |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Distance                                      | The data in this column was describing the race of this length which is 10 miles. Since we already know it is the data from the 10 mile race, having a column that explicitly states that for row of our data is redundant.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Date                                          | We decided to exclude this variable since we know that the race happens at a certain time each year during spring, and having the specific dates would not impact our data question in any way.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| pos_by_sex                                    | This variable gave us the position that a runner finished based on sex of each year. We decided to not use this variable in our data visualization since it was not important to meet our goal.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| total_by_sex                                  | This variable gave us the total number of people by sex per year. We decided to not include it in our analysis since it was not important for visualizing our main goal in exploring this data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| pos_by_div                                    | This variable gives us the position that a runner finished in their assigned division for a certain year. We decided to to not use this variable in our data visualization since it wasn't important to drawing conclusion for our main goal.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| total_by_division                             | This variable gives the total number of individuals in each division for a certain year. The divisions are the same as described above and are excluded for the same reason as above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Pace                                          | The Pace gave the pace per mile of each runner for the race. We decided to exclude this from our analysis because of the fact it wasn't reading in correctly. Also the pace can be calculated directly from the Time variable by dividing it by 10 (the total miles in the race). Therefore we decided to remove this column of data from our data frame.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data from the year of 1973                    | After we cleaned the data, we only had 2 entries left that could be analyzed for that year. Because there were only 2 entries for that year, we decided to exclude it from our analysis because it allegedly does nothing in the context of our goal and it would be kind of useless to graph only 2 points.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data from the year of 1977                    | We decided to remove the data from the year of 1977 due to the fact that there was a large chunk of data missing from the times right in the middle of the race time. We are not given information about what happened in that period that resulted in such record, so we don't have any background about that. Also if we keep this year in our data analysis, is has a potential to make our data analysis biased since there are a lot of points missing from a main part of the times, which would lead to inaccuracy in our interpretations. That is why we have decided to exclude the year from our data.                                                                                                                                                                                                           |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data from the year of 2015 (not yet modified) | The distance of the race ran in 2015 was only 9.39 miles long. Because the data was still good as a whole, we decided to modify the race times using the overall time so the data would be as that of a 10 mile race. We did not have the time to do it for this data visualization project, but plan on doing it with our final.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|                                               | We plan on making this modification by finding the pace of each runner in 2015, dividing that by 9.39 to obtain their pace per mile, and multiplying it by 10 to get their time if they kept that pace for 10 miles.. The times included here will not the actual times of the runners since they have been modified, but the times are "standardized" to be that of a 10 mile race to remove the bias of the race being shorter for this year. If this race would have been the full 10 miles, the times would have been slightly different, but that difference would have been very minimal and insignificant from our modified data of this year for this analysis. Therefore, we decided that this would be a good way to approach the times for this years race instead of just removing all of the data as a whole. |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data from the year of 2019 (not yet modified) | The distance of the race ran in 2019 was 80 yards shy of 10 miles. Due to this we decided to "standardize" the times for the same reasons as above. We haven't done it yet for this data visualization project since we ran out of time, but we plan on doing so for our final.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|                                               | We plan on doing this modification by finding the average pace for each runner in that year and multiplying that by 10 for each runner, giving us the race times for the runner for 10 miles. The same limitations and things should be taken into account for this new time as above. Our group decided it was best to modify this data then to remove it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-+-----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **What was excluded/modified**                | **Reason for exclusion/modification**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Hometown                                      | Many missing values and inconsistencies were found in the data entries. We found a few individuals reporting their hometown differently each time they ran the race or just reporting several at once. Due to this we decided to remove this variable from our analysis because there are no accurate conclusions that can be drawn. Also this is not a variable we could use to fulfill our main objective, so we chose to exclude it from our analysis.                                                                                                                                                                                                                                                                                                                     |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Date                                          | We decided to exclude this variable since it was only useful as a key for joining the weather data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| pos_by_sex                                    | This variable gave us the position that a runner finished based on sex of each year. We decided to not use this variable in our data visualization since it was not important to meet our goal.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| total_by_sex                                  | This variable gave us the total number of people by sex per year. We decided to not include it in our analysis since it was not important for visualizing our main goal in exploring this data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| pos_by_div                                    | This variable gives us the position that a runner finished in their assigned division for a certain year. We decided to to not use this variable in our data visualization since it wasn't important to drawing conclusion for our main goal.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| total_by_division                             | This variable gives the total number of individuals in each division for a certain year. The divisions are the same as described above and are excluded for the same reason as above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pace                                          | The Pace gave the pace per mile of each runner for the race. We decided to exclude this from our analysis because it is redundant as the time divided by 10.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data from the year of 1973                    | After we cleaned the data, we only had 2 entries left that had an age and time recorded so we decided to exclude it from our analysis. The history of the event indicates that record keeping was less reliable in the earlier years and we decided to avoid this year entirely.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data from the year of 1977                    | We decided to remove the data from the year 1977 due to the fact that there was a large subset of data missing from the times right in the middle of the race time. We are not given information about what lead to the missing times but due to the large volume of the missing values we decided to omit the year entirely as biased data.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data from the year of 2015 (not yet modified) | The distance of the race ran in 2015 was only 9.39 miles long. Because the data was still good as a whole, we decided to modify the race times using the overall time so the data would be as that of a 10 mile race. We did not have the time to do it for this data visualization project, but plan on doing it with our final.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                                               | We plan on making this modification by finding the pace of each runner in 2015, dividing that by 9.39 to obtain their pace per mile, and multiplying it by 10 to get their time if they kept that pace for 10 miles.. The times included here will not the actual times of the runners since they have been modified, but the times are estimated to be that of a 10 mile race to remove the bias. If this race would have been the full 10 miles, the times would have been slightly different, but that difference would have been very minimal and insignificant from our modified data of this year for this analysis. Therefore, we decided that this would be a good way to approach the times for this years race instead of just removing all of the data as a whole. |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data from the year of 2019 (not yet modified) | The distance of the race ran in 2019 was 80 yards shy of 10 miles. Due to this we decided to estimate the times for the same reasons as above. We haven't done it yet for this data visualization project since we ran out of time, but we plan on doing so for our final.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                                               | We plan on doing this modification by finding the average pace for each runner in that year and multiplying that by 10 for each runner, giving us the race times for the runner for 10 miles. The same limitations and things should be taken into account for this new time as above. Our group decided it was best to modify this data then to remove it.                                                                                                                                                                                                                                                                                                                                                                                                                   |
++-----------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 # Challenges and Nuances in Our Data
 
@@ -116,15 +112,13 @@ There were a few nuances we discovered that could not be addressed. These were m
 
 ### Loading the Data and Data From Elsewhere/ Ignoring Data
 
-As mentioned above, we uploaded data from the National Oceanic and Atmospheric Administration (NOAA) to use with providing general weather stats for the day of the race. This data does not directly influence our question though, but it is interesting to look at. There was data that we loaded from the Cherry Blossom Race Website that we ignored, but all of those details can be found up above.
+As mentioned above, we uploaded data from NOAA to use with providing general weather stats for the day of the race. This data does not directly influence our question, but we are interested in analysing weather as a potential predictor that explains changes in running times. There was data that we loaded from the Cherry Blossom Race Website that we ignored, but all of those details can be found in table 2.
 
 ### Challenges with the Data and Cleaning the Data
 
-The data presented many challenges that we addressed to ensure more accurate analysis and results. We filtered out results that were missing values for either Age or Time. Some values contained "NR" for not recorded, while others were blank. The column for sex was created from extracting text at the end of the name entries between parentheses. However, that was still an incomplete set of entries for sex, so we also compared those values to the first character in the string for division (since they all start with M or W). This allowed us to use a more extensive set of data. The time variable was loaded as characters and converted into numeric times using the chron library. We noticed a pattern where many inconsistent marathon times were recorded as 40 to 59 hours. We assumed these to be intended as 40 to 59 minutes as those are appropriate with the dataset and converted them. Our data is unique because hard limits bound the time and age variables. We know that the oldest competitor to finish the marathon with a recorded time was 87 and that small children cannot complete a marathon (although there is no age minimum to the race), so we set an age range from 8 to 87 to filter out the erroneous data. For the marathon times, we know that the world record for 10 miles is 43 minutes, so there couldn't be any times below that, and competitors did not have their times recorded if they exceeded 2 hours 20 minutes. This allowed us to filter out any erroneous times between those two values and prevented us from having to perform additional tests for outlying data. After plotting the density curves for every year, we noticed that in 1977, there was a missing subset of data for all times between \~1hr and \~1hr30mins. We know that the data collection process has improved over the years and was initially based on hand-recorded times; in modern times, the results have become based on GPS tracking and digital recording. The data is also challenging to work with due to the size. Half a million rows in our data frame, and the initial data scraping process took 97 minutes to run.
+The data presented many challenges that we addressed to ensure more accurate analysis and results. The column for sex was created from extracting text at the end of the name entries between parentheses. However, that was still an incomplete set of entries for sex and many participants still had missing values. In order to address this we compared those values to the first character in the string for division (since they all start with M or W). This allowed us to use a more extensive set of data with sex as a factor. Since the data was all scraped as text and converted to csv the time variable was loaded as characters and converted into numeric times using the chron library. We noticed a pattern where many inconsistent marathon times were recorded as being 40 to 59 hours. We assumed these to be intended as 40 to 59 minutes as those are appropriate within the context of the dataset and converted them accordingly. Our data is unique because hard limits bound the time and age variables. We know that the oldest competitor to finish the marathon with a recorded time was 87. While there is no age minimum to the required to compete we wanted to set a reasonable minimum age to filter out some participant ages that we perceived as erroneous, so we set an age range from 8 to 87. For the marathon times, we know that the world record for 10 miles is 43 minutes, so there cannot be any times below that, and competitors did not have their times recorded if they exceeded 2 hours 20 minutes. This allowed us to filter out any erroneous times between those two values and prevented us from having to perform additional tests for outlying data. We know that the data collection process has improved over the years and was initially based on hand-recorded times; in modern times, the results have become based on GPS tracking and digital recording. The data is also challenging to work with due to the size. We have over 300,000 rows and the initial data scraping process took 97 minutes to run.
 
-There were a few more challenges that we encountered trying to plot and visualize our data. One of the most annoying was how the times were not displaying properly on any of our graphs. We fixed this by finding out how to create custom tick marks for our graphs, which took a while to figure out due to various issues we encountered.
-
-```{r, message = F, echo=FALSE}
+```{r, warning = FALSE, echo=FALSE, message=FALSE}
 # load packages
 library(tinytex)
 library(dplyr)
@@ -142,7 +136,7 @@ library(olsrr)
 library(leaps)
 ```
 
-```{r, warning = FALSE, echo=FALSE}
+```{r, warning = FALSE, echo=FALSE, message=FALSE}
 
 cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", 
                                      show_col_types = FALSE)
@@ -191,7 +185,7 @@ df2 <- clean_data(cb_10M_2006_2019_weather)
 df <- bind_rows(df1, df2)
 ```
 
-```{r, warning = FALSE, echo=FALSE}
+```{r, warning = FALSE, echo=FALSE, message=FALSE}
 
 # fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
 df <- df %>%
@@ -225,12 +219,6 @@ df_cleaned_full <- df
 df <- df %>% select(Year, Name, Age, Time, Division, Sex, PRCP, TMAX, TMIN)
 ```
 
-```{r, echo=FALSE}
-# add final data to git repository
- write.csv(df, "cleaned_10M_1973_2019.csv", row.names = FALSE)
-
-```
-
 # Summary Statistics:
 
 ### Age, Time and Gender Statistics:
@@ -238,13 +226,13 @@ df <- df %>% select(Year, Name, Age, Time, Division, Sex, PRCP, TMAX, TMIN)
 ```{r descriptive_stats, results="asis", warning=FALSE, echo=FALSE}
 # df with titles for the below summary stats
 titles <-  data.frame(
-  Title = c("Summary Statistics Overall", 
-            "Summary Statistics for Females", 
-            "Summary Statistics for Males", 
+  Title = c("Table 3: Summary Statistics Overall", 
+            "Table 4: Summary Statistics for Females", 
+            "Table 5: Summary Statistics for Males", 
             "Summary Statistics for Age Groups",
             "Summary Statistics for Age Groups Female",
             "Summary Statistics for Age Groups Male",
-            "Weather Statistics for Rain and Temperatures"))
+            "Table 6: Weather Statistics for Rain and Temperatures"))
   
   
 # stats of age and time overall
@@ -253,13 +241,11 @@ kable(summary(df_stat), caption = titles$Title[1])
 
 ```
 
-Looking at the overall statistics, the age range of contestants ranges from 8 years old to 87 years old. The mean age of a runner is 36 years old. 50% of all of the runners are between 29 and 43 years old.
+From table 3, the age range of contestants ranges from 8 years old to 87 years old. The mean age of a runner is 36 years old. 50% of all of the runners are between 29 and 43 years old.
 
-Looking at time, the fastest time to finish a race was 43 minutes 20 seconds, while the slowest recorded was 2 hours and 20 minutes, although we know this time is the slowest allowed to be recorded in the race for it to count, so this is no surprise. The mean time to run this race is 1 hour, 31 minutes, and 25 seconds. 50% of the runners finished the race between 1:19:35 and 01:42:22.
+The fastest time to finish a race was 43 minutes 20 seconds, while the slowest recorded was 2 hours and 20 minutes, although we know this time is the slowest allowed to be recorded in the race for it to count, so this is no surprise. The mean time to run this race is 1 hour, 31 minutes, and 25 seconds. 50% of the runners finished the race between 1:19:35 and 01:42:22.
 
-This does not help answer our question, but it does help us to visualize our data.
-
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE}
 # stats of age and time per gender
 df_females <- df %>%
   filter(Sex == "F") %>%
@@ -274,216 +260,70 @@ kable(summary(df_females), caption = titles$Title[2])
 
 ```
 
-Looking at the Statistics for Age and Time for females, we get the average age to be 34 years old. 50% of female runners are between the age of 27 and 40. The minimum age is 8 and the maximum is 87. The fastest time a woman ran for this race is 48 minutes and 35 seconds, and again the slowest being 2 hours and 20 minutes which is no surprise. The average time to finish the race for females is 1 hour 38 minutes and 11 seconds, which is 7 minutes longer than the average time to run the race overall. 50% of female runners finished the race between 1:28:00 and 1:47:46.
+From table 4 we get the average age to be 34 years old. 50% of female runners are between the age of 27 and 40. The minimum age is 8 and the maximum is 87. The fastest time a woman ran for this race is 48 minutes and 35 seconds. The average time to finish the race for females is 1 hour 38 minutes and 11 seconds, which is 7 minutes longer than the average time to run the race overall. 50% of female runners finished the race between 1:28:00 and 1:47:46.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE}
 kable(summary(df_males), caption = titles$Title[3])
 ```
 
-Looking at the Statistics for Age and Time for males, we get the average age to be 4 years higher than a females, 38 years old. 50% of the male runners are between the age of 30 and 45, which is a higher age range than that of females and the youngest and oldest individuals to run this race are 8 and 87, just like females. The fastest time to finish a race for males was 43 minutes and 20 seconds, while the slowest recorded was 2:19:58. The average time to finish a race for a male is 01:24:54 which is roughly 14 minutes faster than a woman. 50% of males finish between the times of 01:13:54 and 01:34:41.
+From table 5 we get the average age to be 4 years higher than a females, 38 years old. 50% of the male runners are between the age of 30 and 45, which is a higher age range than that of females and the youngest and oldest individuals to run this race are 8 and 87, just like females. The fastest time to finish a race for males was 43 minutes and 20 seconds. The average time to finish a race for a men is 01:24:54 which is roughly 14 minutes faster than women. 50% of males finish between the times of 01:13:54 and 01:34:41.
 
-Both the female and the male statistics don't help us answer the question, but they do provide valueable distributions and insight to our data.
+```{r, echo=FALSE}
 
-## Age and Time States Based on Age Groups
-
-The following 7 tables show us the statistics of age and time distribution amongst age groups. There is a lot for this section and the next, since these are the most important visualizations that help us answer our question.
-
-```{r, echo = FALSE}
-# stats of time per age group
-divisions <- data.frame(
-  div = c("W0119", "M0119", 
-          "W2024", "W2529", "M2024", "M2529",
-          "W3034", "W3539", "M3034", "M3539",
-          "W4044", "W4549", "M4044", "M4549",
-          "W5054", "W5559", "M5054", "M5559", 
-          "W6064", "W6569", "M6064", "M6569", 
-          "W7074", "W7579", "W8099", "M7074", "M7579", "M8099")
+agegroup_times <- data.frame(
+  Gender = rep(c("Overall", "Female", "Male"), each = 7),
+  AgeGroup = rep(c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"), times = 3),
+  MeanTime = c(
+    "01:25:07", "01:31:01", "01:30:36", "01:31:07", "01:34:44", "01:39:19", "01:44:12",  # Overall
+    "01:33:58", "01:36:02", "01:38:02", "01:40:00", "01:43:34", "01:47:13", "01:50:15",  # Female
+    "01:18:45", "01:22:27", "01:23:25", "01:24:59", "01:29:54", "01:36:15", "01:42:30"   # Male
+  )
 )
 
-df_group_8_19 <- df %>% 
-  filter(Division %in% divisions$div[c(1,2)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_8_19), caption = "Statistics for Ages 8 to 19")
+agegroup_times$MeanTime <- times(agegroup_times$MeanTime)
 
-df_group_20_29 <- df %>% 
-  filter(Division %in% divisions$div[c(3,4,5,6)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_20_29), caption = "Statistics for Ages 20 to 29")
+#reorder so 8-19 comes first on plot
+agegroup_times$AgeGroup <- factor(agegroup_times$AgeGroup, levels = c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"))
 
-df_group_30_39 <- df %>% 
-  filter(Division %in% divisions$div[c(7,8,9,10)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_30_39), caption = "Statistics for Ages 30 to 39")
 
-df_group_40_49 <- df %>% 
-  filter(Division %in% divisions$div[c(11,12,13,14)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_40_49), caption = "Statistics for Ages 40 to 49")
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(agegroup_times$MeanTime), max(agegroup_times$MeanTime), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
 
-df_group_50_59 <- df %>% 
-  filter(Division %in% divisions$div[c(15,16,17,18)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_50_59), caption = "Statistics for Ages 50 to 59")
+custom_colors <- c("Overall" = "purple", "Female" = "pink", "Male" = "blue")
 
-df_group_60_69 <- df %>% 
-  filter(Division %in% divisions$div[c(19,20,21,22)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_60_69), caption = "Statistics for Ages 60 to 69")
-
-df_group_70_87 <- df %>% 
-  filter(Division %in% divisions$div[c(23,24,25,26,27,28)]) %>% 
-  select(Age, Time)
-kable(summary(df_group_70_87), caption = "Statistics for Ages 70 to 87")
+ggplot(agegroup_times, aes(x = AgeGroup, y = MeanTime, fill = Gender)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  labs(title = "Figure 1: Mean Time by Age Group and Gender",
+       x = "Age Group",
+       y = "Mean Time") +
+  scale_y_continuous(labels = tick_labels, breaks = tick_positions) +
+  scale_fill_manual(values = custom_colors) +
+  coord_cartesian(ylim = c(min(agegroup_times$MeanTime), max(agegroup_times$MeanTime, na.rm = TRUE)))
 
 ```
 
--   Mean Time for Ages 8 to 19: 01:25:07
-
--   Mean Time for Ages 20 to 29: 01:31:01
-
--   Mean Time for Ages 30 to 39: 01:30:36
-
--   Mean Time for Ages 40 to 49: 01:31:07
-
--   Mean Time for Ages 50 to 59: 01:34:44
-
--   Mean Time for Ages 60 to 69: 01:39:19
-
--   Mean Time for Ages 70 to 87: 01:44:12
-
-Looking at just the mean times, we can see a trend of times becoming slower as the ages become higher.
-
-## Age and Time States Based on Age Groups for Females
-
-```{r, echo = F}
-# stats of time per age group and sex
-fdf_group_8_19 <- df %>% 
-  filter(Division %in% divisions$div[c(1)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_8_19), caption = "Statistics for Ages 8 to 19")
-
-fdf_group_20_29 <- df %>% 
-  filter(Division %in% divisions$div[c(3,4)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_20_29), caption = "Statistics for Ages 20 to 29")
-
-fdf_group_30_39 <- df %>% 
-  filter(Division %in% divisions$div[c(7,8)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_30_39), caption = "Statistics for Ages 30 to 39")
-
-fdf_group_40_49 <- df %>% 
-  filter(Division %in% divisions$div[c(11,12)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_40_49), caption = "Statistics for Ages 40 to 49")
-
-fdf_group_50_59 <- df %>% 
-  filter(Division %in% divisions$div[c(15,16)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_50_59), caption = "Statistics for Ages 50 to 59")
-
-fdf_group_60_69 <- df %>% 
-  filter(Division %in% divisions$div[c(19,20)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_60_69), caption = "Statistics for Ages 60 to 69")
-
-fdf_group_70_87 <- df %>% 
-  filter(Division %in% divisions$div[c(23,24,25)]) %>% 
-  select(Age, Time)
-kable(summary(fdf_group_70_87), caption = "Statistics for Ages 70 to 87")
-
-```
-
--   Ages 8 to 19: Mean time - 01:33:58
-
--   Ages 20 to 29: Mean time - 01:36:02
-
--   Ages 30 to 39: Mean time - 01:38:02
-
--   Ages 40 to 49: Mean time - 01:40:00
-
--   Ages 50 to 59: Mean time - 01:43:34
-
--   Ages 60 to 69: Mean time - 01:47:13
-
--   Ages 70 to 87: Mean time - 01:50:15
-
-With the age groups broken down by gender, we can see even clearer that the race times increase as age does, rougly by about 3 minutes.
-
-## Age and Time States Based on Age Groups For Males
-
-```{r, echo = FALSE}
-mdf_group_8_19 <- df %>% 
-  filter(Division %in% divisions$div[c(2)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_8_19), caption = "Statistics for Ages 8 to 19")
-
-mdf_group_20_29 <- df %>% 
-  filter(Division %in% divisions$div[c(5,6)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_20_29), caption = "Statistics for Ages 20 to 29")
-
-mdf_group_30_39 <- df %>% 
-  filter(Division %in% divisions$div[c(9,10)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_30_39), caption = "Statistics for Ages 30 to 39")
-
-mdf_group_40_49 <- df %>% 
-  filter(Division %in% divisions$div[c(13,14)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_40_49), caption = "Statistics for Ages 40 to 49")
-
-mdf_group_50_59 <- df %>% 
-  filter(Division %in% divisions$div[c(17,18)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_50_59), caption = "Statistics for Ages 50 to 59")
-
-mdf_group_60_69 <- df %>% 
-  filter(Division %in% divisions$div[c(21,22)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_60_69), caption = "Statistics for Ages 60 to 69")
-
-mdf_group_70_87 <- df %>% 
-  filter(Division %in% divisions$div[c(26,27,28)]) %>% 
-  select(Age, Time)
-kable(summary(mdf_group_70_87), caption = "Statistics for Ages 70 to 87")
-```
-
--   **Ages 8 to 19:** Mean time - 01:18:45
-
--   **Ages 20 to 29:** Mean time - 01:22:27
-
--   **Ages 30 to 39:** Mean time - 01:23:25
-
--   **Ages 40 to 49:** Mean time - 01:24:59
-
--   **Ages 50 to 59:** Mean time - 01:29:54
-
--   **Ages 60 to 69:** Mean time - 01:36:15
-
--   **Ages 70 to 87:** Mean time - 01:42:30
-
-Males tend to finish faster than females, but over time, race times become slower. These statistics broken down by gender are very useful and seem like they will provide answers to our analysis.
+From figure 1 we can see a trend of running times increasing along with the age groups. Figure 1 directly establishes the relationship between age and time that we are analyzing.
 
 ```{r, echo = FALSE}
 
 
 ggplot(df, aes(x = Year, fill = Sex)) +
   geom_bar(stat = "count") +
-  labs(title = "Count of Males and Females by Year",
+  labs(title = "Figure 2: Count of Males and Females by Year",
        x = "Year",
        y = "Count") +
   scale_fill_manual(values = c("M" = "blue", "F" = "pink"))
 
 # how many women overall how many men overall yearly and overall
-sex_counts <- df %>% select(Sex) %>% group_by(Sex) %>% count()
-kable(sex_counts)
+# sex_counts <- df %>% select(Sex) %>% group_by(Sex) %>% count()
+# kable(sex_counts)
 
 ```
 
-There were more males overall that ran the race in total. 166755 Females ran the race in total and 172459 Males ran the race in total.
+From figure 2 there were more males overall that ran the race in total. 166755 Females ran the race in total and 172459 Males ran the race in total.
 
-Looking at the graph, we can see that in the beginning years, there were more male than female runners. In roughly 2009 that switched, and now there are more females that run the race annually than males.
+Looking at figure 2, we can see that in the beginning years, there were more male than female runners. In roughly 2009 that switched, and now there are more females that run the race annually than males.
 
 This statistic does not directly provide the answers we are looking for in our goal, but it is informative about our data.
 
@@ -505,12 +345,12 @@ count_rain_years <- rain_years %>%
             No_Rain = sum(!Has_Rain))
 
 # Print the result
-kable(count_rain_years, caption = "Did it Rain the Day of the Race?")
+kable(count_rain_years, caption = "Table 7: Did it Rain the Day of the Race?")
 ```
 
-Examining the weather during the days of the race, we can see that the average weather ranged from 43 to 63 degrees on the day of the race. The lowest temperature of the day of the race throughout all of the years was 32 degrees F, while the highest was 84 F. Temperature minimums ranged from 32 degrees F to 58 degrees F throughout the years of the race. Temperature maximums ranges from 44 degrees F to 84 degrees F on the day of the race.
+Examining the weather during the days of the race in table 6, we can see that the average weather ranged from 43 to 63 degrees on the day of the race. The lowest temperature of the day of the race throughout all of the years was 32 degrees F, while the highest was 84 F. Temperature minimums ranged from 32 degrees F to 58 degrees F throughout the years of the race. Temperature maximums ranges from 44 degrees F to 84 degrees F on the day of the race.
 
-During 26 of the race days, there was no rain, while 19 of the race days had rain.
+From table 7, during 26 of the race days, there was no rain, while 19 of the race days had rain.
 
 This does not help directly answer our question, but it does give us insight into weather distributions for the race.
 
@@ -518,7 +358,7 @@ This does not help directly answer our question, but it does give us insight int
 
 #### Age Density Distribution Plots
 
-```{r, echo=FALSE}
+```{r, warning = FALSE, echo=FALSE, message=FALSE}
 x <- df$Age
 fit <- density(x)
 
@@ -531,7 +371,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Age Density Distribution Curve for \n All Years",
+    title = "Figure 3: Age Density Distribution Curve for \n All Years",
     xaxis = list(
       title = "Age (Years)",
       showline = TRUE
@@ -552,9 +392,9 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 
 ```
 
-This plot is a density plot (that overlays a histogram) of age distribution for all of the years. We can see that the most common runners age is peaked at 28 years old. We can also see that most runners are between the ages of 20 and 60. The density of ages in the range of 20-30 tends to spike up high, but then as ages go up, the density of runners being in that age group goes down. This plot helps us visualize the overall distribution of ages. It is a nice supplemental visualization that directly does not answer our question.
+Figure 3 is a density plot (that overlays a histogram) of age distribution for all of the years. We can see that the most common runners age is peaked at 28 years old. We can also see that most runners are between the ages of 20 and 60. The density of ages in the range of 20-30 tends to spike up high, but then as ages go up, the density of runners being in that age group goes down. This plot helps us visualize the overall distribution of ages and allows us to begin to evaluate the assumptions for further regression analysis.
 
-```{r age ridgeline density plot, echo=FALSE, warning=FALSE }
+```{r age ridgeline density plot, echo=FALSE, warning=FALSE, message=FALSE}
   
 plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
     geom_density_ridges_gradient(
@@ -564,7 +404,7 @@ plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
       colours = c("red", "purple", "blue"),
       name = "Age"
     ) +
-    labs(title = 'Age Distribution by Year', y="")
+    labs(title = 'Figure 4: Age Distribution by Year', y="")
   
 plot_age_dist
 
@@ -576,12 +416,11 @@ tick_labels <- times(tick_positions)
 
 ```
 
-The plot above is a density plot for age seperated by year. We can see the general peak of ages and how it defers from year to year. In 1993 we see the highest concentration in density of older runners while in 1974 we see a peak of lower age runners. The year 1974 also looks the lumpiest out of all of them, probably due to a smaller amount of runners that year.\
-We can see the same trend as with the overall graph with the concentration of runners being ages 25-30. The age with the most peaks also looks to be the same as with the overall graph, roughly 28 years old. This data helps give us a distribution of ages of runners in the race, it doesn't directly answer our question, but gives more context to the age distribution.
+Figure 4 is a density plot for age separated by year. We can see the general peak of ages and how it defers from year to year. In 1993 we see the highest concentration in density of older runners while in 1974 we see a peak of lower age runners. The year 1974 also looks the most non-normal and asymmetrical, probably due to a smaller amount of runners that year. We can see the same trend as with the overall graph with the concentration of runners being ages 25-30. The age with the most peaks also looks to be the same as with the overall graph, roughly 28 years old. This data helps give us a distribution of ages of runners in the race, it doesn't directly answer our question, but gives more context to the age distribution.
 
 #### Time Density Distribution Curve
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 x <- df$Time
 fit <- density(x)
 
@@ -598,7 +437,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
     fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
   ) %>%
   layout(
-    title = "Time Density Distribution Curve for \n All Years ",
+    title = "Figure 5: \n Time Density Distribution Curve \n All Years ",
     xaxis = list(
       title = "Time (hr:min)",
       showline = TRUE,
@@ -619,7 +458,7 @@ plot_ly(x = x, type = "histogram", name = "Histogram") %>%
 # config settings turn of interactive features of plotly for
 ```
 
-This is a density plot (which overlays a histogram) of times. We can see that it is quite normally distributed with the peak denisty time being centered at the average race time of roughly 1 hour and 31 minutes. We can see that the majority of times are between 1 hour and 6 minutes and 1 hour and 55 minutes. The distribution of times is normal. This doesn't really answer our question about age and run times, but it helps us see where the general distribution of the data lies.
+Figure 5 is a density plot (which overlays a histogram) of times. We can see that it is quite normally distributed with the peak density time being centered at the average race time of roughly 1 hour and 31 minutes. We can see that the majority of times are between 1 hour and 6 minutes and 1 hour and 55 minutes. The distribution of times is normal. This doesn't really answer our question about age and run times, but it helps us see where the general distribution of the data lies.
 
 ```{r time ridgeline density plot, echo=FALSE, warning=FALSE }
 
@@ -640,12 +479,12 @@ tick_labels <- times(tick_positions)
     ) +
    scale_x_continuous(labels = tick_labels, breaks = tick_positions
     ) +
-    labs(title = 'Time Distribution by Year', y = "")
+    labs(title = 'Figure 6: Time Distribution by Year', y = "")
 
  plot_time_dist
 ```
 
-This plot shows the density of time distribution by year. We can see that with each year of the race, the time concentrations of finishing the race shifted to taking longer. At first, most of the runners finished between shorter times compared to that of newer years. The year which had the highest concentration of runners finishing faster is 1978, the time for runners to finish peaked at below 01:07:30, which is really fast. The newer average to finish is centered at above 01:31:40. This is no surprise because the race was initially started among elite runners, and then transitioned into beings something that the general public can have access to.
+Figure 6 shows the density of time distribution by year. We can see that with each year of the race, the time concentrations of finishing the race shifted to taking longer. At first, most of the runners finished between shorter times compared to that of newer years. The year which had the highest concentration of runners finishing faster is 1978, the time for runners to finish peaked at below 01:07:30, which is really fast. The newer average to finish is centered at above 01:31:40. This is no surprise because the race was initially started among elite runners, and then transitioned into beings something that the general public can have access to.
 
 ```{r, echo = FALSE}
 # Probalby not using this but saving the code in case we need a single scatter plot
@@ -676,7 +515,7 @@ This plot shows the density of time distribution by year. We can see that with e
 
 ```
 
-```{r scatterplot by year, echo=FALSE, warning=FALSE, fig.dim = c(8, 16)}
+```{r, echo = FALSE, warning = FALSE, message=FALSE, fig.dim = c(8, 16)}
 
 #splitting time to seconds
  time_components <- strsplit(as.character(df$Time), ":")
@@ -691,7 +530,7 @@ df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600,
 #scatterplot of Age vs Time all data 
 ggplot(df,aes(x=Age, y=Time_in_seconds))+
   geom_point(alpha= 0.1, color="purple", size = .5)+
-  labs(title = "Age vs Time scatterplots", y="Time (hr:min:sec)")+
+  labs(title = "Figure 7: Age vs Time scatterplots", y="Time (hr:min:sec)")+
   geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
   scale_y_continuous(labels = function(x) as.character(hms(seconds = x), 
   format = "%H:%M")) +
@@ -699,12 +538,12 @@ ggplot(df,aes(x=Age, y=Time_in_seconds))+
   facet_wrap(~as.factor(Year),ncol = 5)
 ```
 
-Looking at our scatterplots, we can see that the time to run the race increases with age, although not by that much. This is very useful for our analysis, since we are trying to determie whether the fitness of individuals goes down as one ages. Taking the trend lines of the scatter plots above, we can see that there is a trend of decreasing fitness with age.
+In figure 7 we can see that the time to run the race increases with age, although not by that much. This is very useful for our analysis, since we are trying to determine whether the fitness of individuals goes down as one ages. Taking the trend lines of the scatter plots above, we can see that there is a trend of decreasing fitness with age.
 
-```{r}
+```{r, echo=FALSE}
 ggplot(df,aes(x=Age, y=Time_in_seconds))+
   geom_point(alpha= 0.1, color="purple", size = .5)+
-  labs(title = "Age vs Time scatterplots (seperated by sex)", y="Time (hr:min:sec)")+
+  labs(title = "Figure 8: Age vs Time scatterplots (separated by sex)", y="Time (hr:min:sec)")+
   geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
   scale_y_continuous(labels = function(x) as.character(hms(seconds = x), 
   format = "%H:%M")) +
@@ -712,7 +551,8 @@ ggplot(df,aes(x=Age, y=Time_in_seconds))+
   facet_wrap(~as.factor(Sex))
 
 ```
-In this graph we seperate the two sexes males and females. We look at the overall Time and Age of each participant over the years. We can see they both have the pattern of time increasing with age. Between both sexes performance decreases as the age of the participants increase. 
+
+In figure 8 we separate the two sexes males and females. We look at the overall Time and Age of each participant over the years. We can see they both have the pattern of time increasing with age. Between both sexes performance decreases as the age of the participants increase.
 
 ### Model Fitting
 
@@ -768,13 +608,14 @@ To fit a linear model we first need to make a few assumptions
 
 -   The relationship between $Y$ and $\beta$'s is linear.
 
--   The errors are normally distributed. We can check this by plotting a normal Quantile-Quantile Plot
+-   The errors are normally distributed. We can check this by plotting a normal Quantile-Quantile Plot in figure 9
 
 ```{r qqplot, echo=FALSE}
-ols_plot_resid_qq(model, print_plot = TRUE)
+qq_plot <- ols_plot_resid_qq(model, print_plot = FALSE)
+qq_plot + ggtitle("Figure 9: Normal Q-Q Plot")
 ```
 
--   The errors are uncorrelated. But we see that it is not the case from the plot below.
+-   The errors are uncorrelated. But we see that it is not the case from figure 10.
 
 -   The errors have constant variance and zero mean.
 
@@ -784,7 +625,7 @@ ols_plot_resid_qq(model, print_plot = TRUE)
 ggplot(model, aes(x= .fitted, y= .resid))+
   geom_point(alpha = 0.1, color="violet", size = 0.5)+
   geom_hline(yintercept = 0, color = "red")+
-  labs(title = "Residual Error vs Fitted Values",
+  labs(title = "Figure 10: Residual Error vs Fitted Values",
        y = "Residual Errors(seconds)", x="Fitted Values(seconds)")+
   theme_bw()
 ```
@@ -792,7 +633,3 @@ ggplot(model, aes(x= .fitted, y= .resid))+
 #### Further Analysis of Linear Models
 
 For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance. After the fix, we would be able to see more accurate model results. The model could potentially give us insight about the relationship between age and runner times/ fitness.
-
-# Concluding Thoughts
-
-Looking at all of the data visualization we have done, our next steps would focus on exploring the stats by age groups (divided by sex) and also the scatterplots. We plan to try extracting runners that ran several races and see if there is a difference with that trend as compared to individuals who only ran once (as in if the times change across an increasing age differently). We also want to try to bootstrap the different age groups and see if there is truly a difference between the ages and running times and then try to model it again. This data visualization helped us see what areas we need to focus on for our final analysis.
