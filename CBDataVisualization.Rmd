@@ -338,6 +338,7 @@ df_50_59_F <- subset(df, age_group == "50-59" & Sex == "F")
 df_60_69_F <- subset(df, age_group == "60-69" & Sex == "F")
 df_70_87_F <- subset(df, age_group == "70-87" & Sex == "F")
 
+
 ########################
 ```
 
@@ -788,20 +789,11 @@ ggplot(model, aes(x= .fitted, y= .resid))+
 
 For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance. After the fix, we would be able to see more accurate model results. The model could potentially give us insight about the relationship between age and runner times/ fitness.
 
+1.  Building a linear model with all the data did not give us any conclusive results but what if we can take a random sample where there is equal distribution among the ages or divisions and see performance/physical activity? Divide the data based on the divisions. Look at lab activity 3 Based on the size of the smallest division, randomly pick participants for all other divisions. Now build a model and check for linear association
 
+2.  Another experiment is if we can see in a particular year if one group are longtime runners in the CUCB 10k while the other group is 1st time runners. Is there a difference in activity/performance based on age group? We will need to extract new data to get the names of longtime runners. (Kevin?) Pick out the years where there were no disturbances/external factors affecting the race, pick out the 2 groups of runners and look for any interesting relationships between the 2 groups.
 
-
-1. Building a linear model with all the data did not give us any conclusive results but what if we can take a random sample where there is equal distribution among the ages or divisions and see performance/physical activity?
-      Divide the data based on the divisions. Look at lab activity 3
-      Based on the size of the smallest division, randomly pick participants for all other divisions.
-      Now build a model and check for linear association
-      
-2. Another experiment is if we can see in a particular year if one group are longtime runners in the CUCB 10k while the other group is 1st time runners. Is there a difference in activity/performance based on age group? 
-        We will need to extract new data to get the names of longtime runners. (Kevin?)
-         Pick out the years where there were no disturbances/external factors affecting the race, pick out the 2 groups of  runners and look for any                interesting relationships between the 2 groups.
-
-3. Effect of external factors on the overall performance of the runners. Do we see that the days of rain, snow and flooding increased the overall average runtime of the runners?
-
+3.  Effect of external factors on the overall performance of the runners. Do we see that the days of rain, snow and flooding increased the overall average runtime of the runners?
 
 ```{r}
 # Define age groups
@@ -819,8 +811,6 @@ Performance <- as_tibble(df) %>%
     Age >= 70 ~ ageGroup[7]
   ))
 ```
-
-
 
 ```{r divisions}
 
@@ -897,7 +887,6 @@ ggplot(Performance,aes(y=Age, x=Time_in_seconds))+
 
 ```
 
-
 ```{r}
 # Define percentiles
 percentile <- c("10th", "20th", "30th", "40th", "50th", "60th", "70th", "80th", "90th", "100th")
@@ -962,10 +951,3 @@ ggplot(Performance,aes(x=Age, y=Time_in_seconds))+
 
 
 ```
-
-
-
-
-
-
-
