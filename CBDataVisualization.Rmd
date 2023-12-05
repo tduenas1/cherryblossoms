@@ -134,6 +134,7 @@ library(knitr)
 library(GGally)
 library(olsrr)
 library(leaps)
+library(ggpmisc)
 ```
 
 ```{r, warning = FALSE, echo=FALSE, message=FALSE}
@@ -651,3 +652,185 @@ ggplot(model, aes(x= .fitted, y= .resid))+
 #### Further Analysis of Linear Models
 
 For a better fit we want to look for variance-stabilizing transformations to correct the constant variance of errors. This will provide a fix for the basic assumption of linear models for constant variance. After the fix, we would be able to see more accurate model results. The model could potentially give us insight about the relationship between age and runner times/ fitness.
+
+
+
+
+1. Building a linear model with all the data did not give us any conclusive results but what if we can take a random sample where there is equal distribution among the ages or divisions and see performance/physical activity?
+      Divide the data based on the divisions. Look at lab activity 3
+      Based on the size of the smallest division, randomly pick participants for all other divisions.
+      Now build a model and check for linear association
+      
+2. Another experiment is if we can see in a particular year if one group are longtime runners in the CUCB 10k while the other group is 1st time runners. Is there a difference in activity/performance based on age group? 
+        We will need to extract new data to get the names of longtime runners. (Kevin?)
+         Pick out the years where there were no disturbances/external factors affecting the race, pick out the 2 groups of  runners and look for any                interesting relationships between the 2 groups.
+
+3. Effect of external factors on the overall performance of the runners. Do we see that the days of rain, snow and flooding increased the overall average runtime of the runners?
+
+
+```{r}
+# Define age groups
+ageGroup <- c("0-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-89+")
+
+# Add a new column 'AgeGroup' based on the age ranges
+Performance <- as_tibble(df) %>% 
+  mutate(AgeGroup = case_when(
+    Age < 20 ~ ageGroup[1],
+    Age >= 20 & Age < 30 ~ ageGroup[2],
+    Age >= 30 & Age < 40 ~ ageGroup[3],
+    Age >= 40 & Age < 50 ~ ageGroup[4],
+    Age >= 50 & Age < 60 ~ ageGroup[5],
+    Age >= 60 & Age < 70 ~ ageGroup[6],
+    Age >= 70 ~ ageGroup[7]
+  ))
+```
+
+
+
+```{r divisions}
+
+#splitting time to seconds
+ time_components <- strsplit(as.character(df$Time), ":")
+ df$Time_in_seconds <- sapply(time_components, function(x) {
+   as.numeric(x[1]) * 3600 + as.numeric(x[2]) * 60 + as.numeric(x[3])
+ })
+
+# Convert 'Time_in_seconds' back to "hh:mm" format for y-axis labels
+df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, 
+(df$Time_in_seconds %% 3600) %/% 60)
+
+division_models <- df %>%
+  group_by(Division) %>%
+  do(model_div = lm(Time_in_seconds ~ Age, data = .)) 
+
+# View summaries of the models
+division_summaries <- summary(division_models$model_div)
+```
+
+```{r}
+# Define percentiles
+percentile <- c("10th", "20th", "30th", "40th", "50th", "60th", "70th", "80th", "90th", "100th")
+
+# Create an empty matrix for cleaned data performance with 10 columns
+Performance <- matrix(ncol = 12)
+
+# Set column names for the matrix
+colnames(Performance) <- c(colnames(df), "centile")
+
+# Iterate over each year in the dataset
+for (i in unique(df$Year)){
+
+  # Filter data for the current year and calculate percentiles
+  temp <- as_tibble(df) %>% 
+    filter(Year == i ) %>% 
+    mutate(centile = ecdf(.data$Time)(.data$Time))  
+
+  # Append the data to the performance matrix
+  invisible(Performance <- rbind(Performance, temp))
+}
+
+# Remove the first row (empty) from the performance matrix
+Performance <- Performance[-1,]
+
+# Convert the performance matrix to a tibble and create a new column 'Percentile'
+Performance <- as_tibble(Performance) %>% 
+  mutate(Percentile = case_when(
+    centile < 0.10 ~ percentile[1],
+    centile >= 0.10 & centile < 0.20 ~ percentile[2],
+    centile >= 0.20 & centile < 0.30 ~ percentile[3],
+    centile >= 0.30 & centile < 0.40 ~ percentile[4],
+    centile >= 0.40 & centile < 0.50 ~ percentile[5],
+    centile >= 0.50 & centile < 0.60 ~ percentile[6],
+    centile >= 0.60 & centile < 0.70 ~ percentile[7],
+    centile >= 0.70 & centile < 0.80 ~ percentile[8],
+    centile >= 0.80 & centile < 0.90 ~ percentile[9],
+    centile >= 0.90 & centile <= 1.0 ~ percentile[10]
+  )) %>% 
+  select(-centile)
+
+
+ggplot(Performance,aes(y=Age, x=Time_in_seconds))+
+  geom_point(alpha= 0.1, color="purple", size = .5)+
+  labs(title = "Age vs Time scatterplots", x="Time (hr:min:sec)")+
+  geom_smooth(formula = x ~ y, method = lm, se = FALSE)+
+   stat_poly_eq(use_label(c("eq"))) +
+  stat_poly_eq(label.x = 0.9) +
+  scale_x_continuous(labels = function(x) as.character(hms(seconds = x), 
+  format = "%H:%M")) +
+  theme_bw()+
+  facet_wrap(factor(Sex)~factor(Division), nrow = 4)
+
+```
+
+
+```{r}
+# Define percentiles
+percentile <- c("10th", "20th", "30th", "40th", "50th", "60th", "70th", "80th", "90th", "100th")
+
+# Create an empty matrix for cleaned data performance with 10 columns
+Performance <- matrix(ncol = 12)
+
+# Set column names for the matrix
+colnames(Performance) <- c(colnames(df), "centile")
+
+# Iterate for each Sex in the dataset
+for (i in unique(df$Sex)){
+
+  # Filter data for the current year and calculate percentiles
+  temp <- as_tibble(df) %>% 
+    filter(Sex == i ) %>% 
+    mutate(centile = ecdf(.data$Time)(.data$Time))  
+
+  # Append the data to the performance matrix
+  invisible(Performance <- rbind(Performance, temp))
+}
+
+# Remove the first row (empty) from the performance matrix
+Performance <- Performance[-1,]
+
+# Convert the performance matrix to a tibble and create a new column 'Percentile'
+Performance <- as_tibble(Performance) %>% 
+  mutate(Percentile = case_when(
+    centile < 0.10 ~ percentile[1],
+    centile >= 0.10 & centile < 0.20 ~ percentile[2],
+    centile >= 0.20 & centile < 0.30 ~ percentile[3],
+    centile >= 0.30 & centile < 0.40 ~ percentile[4],
+    centile >= 0.40 & centile < 0.50 ~ percentile[5],
+    centile >= 0.50 & centile < 0.60 ~ percentile[6],
+    centile >= 0.60 & centile < 0.70 ~ percentile[7],
+    centile >= 0.70 & centile < 0.80 ~ percentile[8],
+    centile >= 0.80 & centile < 0.90 ~ percentile[9],
+    centile >= 0.90 & centile <= 1.0 ~ percentile[10]
+  )) %>% 
+  select(-centile)
+
+
+centile_models <- Performance %>%
+  group_by(Sex) %>% 
+  group_by(Percentile) %>%
+  do(model_centile = lm(Time_in_seconds ~ Age, data = .)) 
+
+for(i in 10){
+  plot(centile_models$model_centile[[i]],2)
+}
+ggplot(Performance,aes(x=Age, y=Time_in_seconds))+
+  geom_point(alpha= 0.1, color="purple", size = .5)+
+  labs(title = "Age vs Time scatterplots", y="Time (hr:min:sec)")+
+  geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
+   stat_poly_eq(use_label(c("eq"))) +
+  stat_poly_eq(label.y = 0.9) +
+  scale_y_continuous(labels = function(x) as.character(hms(seconds = x), 
+  format = "%H:%M")) +
+  theme_bw()+
+  facet_wrap(factor(Sex)~factor(Percentile,levels=percentile), nrow = 2)
+
+
+
+```
+
+
+
+
+
+
+
