@@ -134,7 +134,6 @@ library(knitr)
 library(GGally)
 library(olsrr)
 library(leaps)
-library(ggpmisc)
 ```
 
 ```{r, warning = FALSE, echo=FALSE, message=FALSE}
@@ -305,6 +304,115 @@ ggplot(agegroup_times, aes(x = AgeGroup, y = MeanTime, fill = Gender)) +
 ```
 
 From figure 1 we can see a trend of running times increasing along with the age groups. Figure 1 directly establishes the relationship between age and time that we are analyzing.
+
+```{r}
+# age group subsets
+age_bins <- c(8, 20, 30, 40, 50, 60, 70, 88)
+df$age_group <- cut(df$Age, breaks = age_bins, labels = c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"), include.lowest = TRUE)
+# Create separate DataFrames for each age group
+df_8_19 <- subset(df, age_group == "8-19")
+df_20_29 <- subset(df, age_group == "20-29")
+df_30_39 <- subset(df, age_group == "30-39")
+df_40_49 <- subset(df, age_group == "40-49")
+df_50_59 <- subset(df, age_group == "50-59")
+df_60_69 <- subset(df, age_group == "60-69")
+df_70_87 <- subset(df, age_group == "70-87")
+df_8_19_M <- subset(df, age_group == "8-19" & Sex == "M")
+df_20_29_M <- subset(df, age_group == "20-29" & Sex == "M")
+df_30_39_M <- subset(df, age_group == "30-39" & Sex == "M")
+df_40_49_M <- subset(df, age_group == "40-49" & Sex == "M")
+df_50_59_M <- subset(df, age_group == "50-59" & Sex == "M")
+df_60_69_M <- subset(df, age_group == "60-69" & Sex == "M")
+df_70_87_M <- subset(df, age_group == "70-87" & Sex == "M")
+df_8_19_F <- subset(df, age_group == "8-19" & Sex == "F")
+df_20_29_F <- subset(df, age_group == "20-29" & Sex == "F")
+df_30_39_F <- subset(df, age_group == "30-39" & Sex == "F")
+df_40_49_F <- subset(df, age_group == "40-49" & Sex == "F")
+df_50_59_F <- subset(df, age_group == "50-59" & Sex == "F")
+df_60_69_F <- subset(df, age_group == "60-69" & Sex == "F")
+df_70_87_F <- subset(df, age_group == "70-87" & Sex == "F")
+########################
+```
+
+```{r}
+# t test function run and join
+run_t_tests <- function(df1, df2, group1_name, group2_name, num_t_test = 100, sample_size = 100) {
+  # Set the seed for reproducibility
+  set.seed(42)
+  # Create an empty dataframe to store comparison results
+  comparison_results_df <- data.frame(
+    comparison_name = character(),
+    reject_null = logical()
+  )
+  # Run each random sample num_t_test times
+  for (i in 1:num_t_test) {
+    # Take a random sample of sample_size from each dataframe
+    sample1 <- df1[sample(nrow(df1), sample_size, replace = TRUE), ]
+    sample2 <- df2[sample(nrow(df2), sample_size, replace = TRUE), ]
+    
+    # Perform t-tests on the random samples
+    t_test_result <- t.test(sample1$Time, sample2$Time)
+    
+    # Create a new row with the comparison result
+    new_row <- data.frame(
+      comparison_name = paste(group1_name, "to", group2_name),
+      reject_null = t_test_result$p.value < 0.05
+    )
+    
+    # Append the new row to the dataframe
+    comparison_results_df <- rbind(comparison_results_df, new_row)
+  }
+  # Return the dataframe of comparison results
+  return(comparison_results_df)
+}
+run1 <- run_t_tests(df_8_19, df_20_29, group1_name = "8-19", group2_name = "20-29")
+run2 <- run_t_tests(df_20_29, df_30_39, group1_name = "20-29", group2_name = "30-39")
+run3 <- run_t_tests(df_30_39, df_40_49, group1_name = "30-39", group2_name = "40-49")
+run4 <- run_t_tests(df_40_49, df_50_59, group1_name = "40-49", group2_name = "50-59")
+run5 <- run_t_tests(df_50_59, df_60_69, group1_name = "50-59", group2_name = "60-69")
+run6 <- run_t_tests(df_60_69, df_70_87, group1_name = "60-69", group2_name = "70-87")
+run1m <- run_t_tests(df_8_19_M, df_20_29_M, group1_name = "8-19", group2_name = "20-29")
+run2m <- run_t_tests(df_20_29_M, df_30_39_M, group1_name = "20-29", group2_name = "30-39")
+run3m <- run_t_tests(df_30_39_M, df_40_49_M, group1_name = "30-39", group2_name = "40-49")
+run4m <- run_t_tests(df_40_49_M, df_50_59_M, group1_name = "40-49", group2_name = "50-59")
+run5m <- run_t_tests(df_50_59_M, df_60_69_M, group1_name = "50-59", group2_name = "60-69")
+run6m <- run_t_tests(df_60_69_M, df_70_87_M, group1_name = "60-69", group2_name = "70-87")
+run1f <- run_t_tests(df_8_19_F, df_20_29_F, group1_name = "8-19", group2_name = "20-29")
+run2f <- run_t_tests(df_20_29_F, df_30_39_F, group1_name = "20-29", group2_name = "30-39")
+run3f <- run_t_tests(df_30_39_F, df_40_49_F, group1_name = "30-39", group2_name = "40-49")
+run4f <- run_t_tests(df_40_49_F, df_50_59_F, group1_name = "40-49", group2_name = "50-59")
+run5f <- run_t_tests(df_50_59_F, df_60_69_F, group1_name = "50-59", group2_name = "60-69")
+run6f <- run_t_tests(df_60_69_F, df_70_87_F, group1_name = "60-69", group2_name = "70-87")
+df_p_M <- bind_rows(run1m, run2m, run3m, run4m, run5m, run6m)
+df_p_F <- bind_rows(run1, run2, run3, run4, run5, run6)
+df_p <- bind_rows(run1, run2, run3, run4, run5, run6)
+```
+
+```{r}
+# plot function
+create_stacked_histogram <- function(df, title) {
+  df$comparison_name <- factor(df$comparison_name, levels = c("8-19 to 20-29", "20-29 to 30-39", "30-39 to 40-49", "40-49 to 50-59", "50-59 to 60-69", "60-69 to 70-87"))
+  
+  ggplot(df, aes(x = comparison_name, fill = factor(reject_null))) +
+    geom_bar(position = "stack", stat = "count") +
+    labs(title = title,
+         x = "Comparison Group",
+         y = "Number of t-tests ran",
+         fill = "Reject Null \n (P-value < 0.05)") +
+    scale_fill_manual(values = c("TRUE" = "forestgreen", "FALSE" = "darkred")) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+# Call the function with the dataframe and title
+plot_result_all <- create_stacked_histogram(df_p, "T-test Comparisons: All Genders \n Sample Sizes of 100 per age group")
+plot_result_men <- create_stacked_histogram(df_p_M, "T-test Comparisons: Men \n Sample Sizes of 100 per age group")
+plot_result_women <- create_stacked_histogram(df_p_F, "T-test Comparisons: Women \n Sample Sizes of 100 per age group")
+# Print the plot
+print(plot_result_all)
+print(plot_result_men)
+print(plot_result_women)
+```
+
 
 ```{r, echo = FALSE}
 
