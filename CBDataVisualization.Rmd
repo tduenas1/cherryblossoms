@@ -466,6 +466,10 @@ kable(summary(mdf_group_70_87), caption = "Statistics for Ages 70 to 87")
 Males tend to finish faster than females, but over time, race times become slower. These statistics broken down by gender are very useful and seem like they will provide answers to our analysis.
 
 ```{r}
+# T-tests start here
+
+
+
 # age group subsets
 age_bins <- c(8, 20, 30, 40, 50, 60, 70, 88)
 df$age_group <- cut(df$Age, breaks = age_bins, labels = c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"), include.lowest = TRUE)
