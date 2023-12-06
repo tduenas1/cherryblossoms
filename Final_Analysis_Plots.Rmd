@@ -1,0 +1,481 @@
+---
+title: "Final Plots and Analysis"
+author: "Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser"
+date: "2023-12-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, message = F, echo=FALSE}
+# load packages
+library(tinytex)
+library(dplyr)
+library(ggplot2)
+library(chron)
+library(plotly)
+library(purrr)
+library(RColorBrewer)
+library(readr)
+library(ggridges)
+library(hms)
+library(knitr)
+library(GGally)
+library(olsrr)
+library(leaps)
+```
+
+
+```{r, warning = FALSE, echo=FALSE}
+
+cb_10M_1973_2005_weather <- read_csv("cb_10M_1973_2005_weather.csv", 
+                                     show_col_types = FALSE)
+
+cb_10M_2006_2019_weather <- read_csv("cb_10M_2006_2019_weather.csv", 
+                                     show_col_types = FALSE)
+
+clean_data <- function(df) {
+  df <- dplyr::select(df, Year, Name, Age, 
+               Time, Pace, Division, Hometown,
+               Distance, pos_by_sex, total_by_sex, 
+               pos_by_division, total_by_division,
+               Sex, DATE, PRCP, TMAX, TMIN)
+
+  df$Age[df$Age == 'NR'] <- 0
+  df$Time[df$Time == 'NR'] <- 0
+
+  
+df <- df %>%
+    mutate(
+      Year = as.integer(Year),
+      Name = as.character(Name),
+      Age = as.integer(Age, na.rm = TRUE),
+      Time = as.character(Time),
+      Pace = as.character(Pace),
+      Division = as.character(Division),
+      Hometown = as.character(Hometown),
+      pos_by_sex = as.integer(pos_by_sex),
+      total_by_sex = as.integer(total_by_sex),
+      pos_by_division = as.integer(pos_by_division),
+      total_by_division = as.integer(total_by_division),
+      Sex = as.character(Sex),
+      DATE = as.chron(DATE),
+      PRCP = as.numeric(PRCP),
+      TMAX = as.integer(TMAX),
+      TMIN = as.integer(TMIN)
+    )
+  
+  return(df)
+}
+
+df1 <- clean_data(cb_10M_1973_2005_weather)
+df2 <- clean_data(cb_10M_2006_2019_weather)
+
+
+df <- bind_rows(df1, df2)
+```
+
+```{r, warning = FALSE, echo=FALSE}
+
+# fixes times with mins recorded as hrs (mm:ss:00 -> 00:mm:ss)
+df <- df %>%
+  mutate(
+    Time = ifelse(
+      Time >= "43:00:00" & Time <= "59:59:59",
+      paste0("00:", substr(Time, 1, 2), ":", substr(Time, 4, 5)),
+      Time
+    )
+  )
+
+
+df <- df %>%
+  filter(!is.na(Time) & Time != "" & Time != "00:00:00") %>%
+  mutate(Time = chron::times(Time)) %>%
+  filter(!is.na(Time)) %>%
+  filter(Time >= "00:43:00" & Time <= "02:20:00") %>%
+  filter(Age >= 8 & Age <= 87) %>%
+  filter(Year != 1977) %>%
+  filter(Year != 1973) %>%
+  mutate(
+    # replaces 'W' with 'F' in sex col
+    Sex = ifelse(Sex == 'W', 'F', Sex),
+    # correction for missing values by first character in division
+    Sex = ifelse(substr(Division, 1, 1) == 'W', 'F', Sex),
+    Sex = ifelse(substr(Division, 1, 1) == 'M', 'M', Sex)
+  )
+
+df_cleaned_full <- df
+
+df <- df %>% select(Year, Name, Age, Time, Division, Sex, PRCP, TMAX, TMIN)
+```
+
+
+```{r}
+# T-tests start here
+
+
+
+# age group subsets
+age_bins <- c(8, 20, 30, 40, 50, 60, 70, 88)
+df$age_group <- cut(df$Age, breaks = age_bins, labels = c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"), include.lowest = TRUE)
+# Create separate DataFrames for each age group
+df_8_19 <- subset(df, age_group == "8-19")
+df_20_29 <- subset(df, age_group == "20-29")
+df_30_39 <- subset(df, age_group == "30-39")
+df_40_49 <- subset(df, age_group == "40-49")
+df_50_59 <- subset(df, age_group == "50-59")
+df_60_69 <- subset(df, age_group == "60-69")
+df_70_87 <- subset(df, age_group == "70-87")
+df_8_19_M <- subset(df, age_group == "8-19" & Sex == "M")
+df_20_29_M <- subset(df, age_group == "20-29" & Sex == "M")
+df_30_39_M <- subset(df, age_group == "30-39" & Sex == "M")
+df_40_49_M <- subset(df, age_group == "40-49" & Sex == "M")
+df_50_59_M <- subset(df, age_group == "50-59" & Sex == "M")
+df_60_69_M <- subset(df, age_group == "60-69" & Sex == "M")
+df_70_87_M <- subset(df, age_group == "70-87" & Sex == "M")
+df_8_19_F <- subset(df, age_group == "8-19" & Sex == "F")
+df_20_29_F <- subset(df, age_group == "20-29" & Sex == "F")
+df_30_39_F <- subset(df, age_group == "30-39" & Sex == "F")
+df_40_49_F <- subset(df, age_group == "40-49" & Sex == "F")
+df_50_59_F <- subset(df, age_group == "50-59" & Sex == "F")
+df_60_69_F <- subset(df, age_group == "60-69" & Sex == "F")
+df_70_87_F <- subset(df, age_group == "70-87" & Sex == "F")
+########################
+```
+
+```{r}
+# t test function run and join
+run_t_tests <- function(df1, df2, group1_name, group2_name, num_t_test = 100, sample_size = 100) {
+  # Set the seed for reproducibility
+  set.seed(42)
+  # Create an empty dataframe to store comparison results
+  comparison_results_df <- data.frame(
+    comparison_name = character(),
+    reject_null = logical()
+  )
+  # Run each random sample num_t_test times
+  for (i in 1:num_t_test) {
+    # Take a random sample of sample_size from each dataframe
+    sample1 <- df1[sample(nrow(df1), sample_size, replace = TRUE), ]
+    sample2 <- df2[sample(nrow(df2), sample_size, replace = TRUE), ]
+    
+    # Perform t-tests on the random samples
+    t_test_result <- t.test(sample1$Time, sample2$Time)
+    
+    # Create a new row with the comparison result
+    new_row <- data.frame(
+      comparison_name = paste(group1_name, "to", group2_name),
+      reject_null = t_test_result$p.value < 0.05
+    )
+    
+    # Append the new row to the dataframe
+    comparison_results_df <- rbind(comparison_results_df, new_row)
+  }
+  # Return the dataframe of comparison results
+  return(comparison_results_df)
+}
+run1 <- run_t_tests(df_8_19, df_20_29, group1_name = "8-19", group2_name = "20-29")
+run2 <- run_t_tests(df_20_29, df_30_39, group1_name = "20-29", group2_name = "30-39")
+run3 <- run_t_tests(df_30_39, df_40_49, group1_name = "30-39", group2_name = "40-49")
+run4 <- run_t_tests(df_40_49, df_50_59, group1_name = "40-49", group2_name = "50-59")
+run5 <- run_t_tests(df_50_59, df_60_69, group1_name = "50-59", group2_name = "60-69")
+run6 <- run_t_tests(df_60_69, df_70_87, group1_name = "60-69", group2_name = "70-87")
+run1m <- run_t_tests(df_8_19_M, df_20_29_M, group1_name = "8-19", group2_name = "20-29")
+run2m <- run_t_tests(df_20_29_M, df_30_39_M, group1_name = "20-29", group2_name = "30-39")
+run3m <- run_t_tests(df_30_39_M, df_40_49_M, group1_name = "30-39", group2_name = "40-49")
+run4m <- run_t_tests(df_40_49_M, df_50_59_M, group1_name = "40-49", group2_name = "50-59")
+run5m <- run_t_tests(df_50_59_M, df_60_69_M, group1_name = "50-59", group2_name = "60-69")
+run6m <- run_t_tests(df_60_69_M, df_70_87_M, group1_name = "60-69", group2_name = "70-87")
+run1f <- run_t_tests(df_8_19_F, df_20_29_F, group1_name = "8-19", group2_name = "20-29")
+run2f <- run_t_tests(df_20_29_F, df_30_39_F, group1_name = "20-29", group2_name = "30-39")
+run3f <- run_t_tests(df_30_39_F, df_40_49_F, group1_name = "30-39", group2_name = "40-49")
+run4f <- run_t_tests(df_40_49_F, df_50_59_F, group1_name = "40-49", group2_name = "50-59")
+run5f <- run_t_tests(df_50_59_F, df_60_69_F, group1_name = "50-59", group2_name = "60-69")
+run6f <- run_t_tests(df_60_69_F, df_70_87_F, group1_name = "60-69", group2_name = "70-87")
+df_p_M <- bind_rows(run1m, run2m, run3m, run4m, run5m, run6m)
+df_p_F <- bind_rows(run1, run2, run3, run4, run5, run6)
+df_p <- bind_rows(run1, run2, run3, run4, run5, run6)
+```
+
+```{r}
+# plot function
+create_stacked_histogram <- function(df, title) {
+  df$comparison_name <- factor(df$comparison_name, levels = c("8-19 to 20-29", "20-29 to 30-39", "30-39 to 40-49", "40-49 to 50-59", "50-59 to 60-69", "60-69 to 70-87"))
+  
+  ggplot(df, aes(x = comparison_name, fill = factor(reject_null))) +
+    geom_bar(position = "stack", stat = "count") +
+    labs(title = title,
+         x = "Comparison Group",
+         y = "Number of t-tests ran",
+         fill = "Reject Null \n (P-value < 0.05)") +
+    scale_fill_manual(values = c("TRUE" = "forestgreen", "FALSE" = "darkred")) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+# Call the function with the dataframe and title
+plot_result_all <- create_stacked_histogram(df_p, "T-test Comparisons: All Genders \n Sample Sizes of 100 per age group")
+plot_result_men <- create_stacked_histogram(df_p_M, "T-test Comparisons: Men \n Sample Sizes of 100 per age group")
+plot_result_women <- create_stacked_histogram(df_p_F, "T-test Comparisons: Women \n Sample Sizes of 100 per age group")
+# Print the plot
+print(plot_result_all)
+print(plot_result_men)
+print(plot_result_women)
+```
+
+
+
+```{r, echo = FALSE}
+
+
+ggplot(df, aes(x = Year, fill = Sex)) +
+  geom_bar(stat = "count") +
+  labs(title = "Count of Males and Females by Year",
+       x = "Year",
+       y = "Count") +
+  scale_fill_manual(values = c("M" = "blue", "F" = "pink"))
+
+# how many women overall how many men overall yearly and overall
+sex_counts <- df %>% select(Sex) %>% group_by(Sex) %>% count()
+kable(sex_counts)
+
+```
+
+
+
+
+
+```{r, echo=FALSE}
+x <- df$Age
+fit <- density(x)
+
+plot_ly(x = x, type = "histogram", name = "Histogram") %>%
+  add_trace(
+    x = fit$x, y = fit$y,
+    type = "scatter", mode = "lines",
+    fill = "tozeroy", yaxis = "y2", name = "Density Curve",
+    line = list(color = "red"),  # Change the density curve line color here
+    fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
+  ) %>%
+  layout(
+    title = "Age Density Distribution Curve for \n All Years",
+    xaxis = list(
+      title = "Age (Years)",
+      showline = TRUE
+    ),
+    yaxis2 = list(
+      title = "Density",
+      showline = TRUE,
+      overlaying = "y"
+    ),
+    yaxis = list(
+      showticklabels = FALSE,
+      side = "left"
+    )
+  ) %>%
+  config(scrollZoom = FALSE, displayModeBar = FALSE, editable = FALSE)
+# config settings turn of interactive features of plotly for
+
+
+```
+
+
+
+```{r age ridgeline density plot, echo=FALSE, warning=FALSE }
+  
+plot_age_dist <- ggplot(df, aes(x = Age, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 8, size = 0.1
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Age"
+    ) +
+    labs(title = 'Age Distribution by Year', y="")
+  
+plot_age_dist
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(df$Time), max(df$Time), 
+                      length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+
+
+```
+
+
+
+
+```{r, echo=FALSE}
+x <- df$Time
+fit <- density(x)
+
+custom_ticks <- c("00:42", "01:06", "01:31", "01:55", "02:20")
+tick_positions <- seq(min(x), max(x), length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+plot_ly(x = x, type = "histogram", name = "Histogram") %>%
+  add_trace(
+    x = fit$x, y = fit$y,
+    type = "scatter", mode = "lines",
+    fill = "tozeroy", yaxis = "y2", name = "Density Curve",
+    line = list(color = "red"),  # Change the density curve line color here
+    fillcolor = 'rgba(0, 0, 255, 0.4)'  # Change the histogram bars fill color here
+  ) %>%
+  layout(
+    title = "Time Density Distribution Curve for \n All Years ",
+    xaxis = list(
+      title = "Time (hr:min)",
+      showline = TRUE,
+      tickvals = tick_positions,
+      ticktext = custom_ticks
+    ),
+    yaxis2 = list(
+      title = "Density",
+      showline = TRUE,
+      overlaying = "y"
+    ),
+    yaxis = list(
+      showticklabels = FALSE,
+      side = "left"
+    )
+  ) %>%
+  config(scrollZoom = FALSE, displayModeBar = FALSE, editable = FALSE)
+# config settings turn of interactive features of plotly for
+```
+
+
+```{r time ridgeline density plot, echo=FALSE, warning=FALSE }
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(df$Time), max(df$Time), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+
+  # Plotting density ridgeline plot for Time by Year
+ plot_time_dist <-  ggplot(df, aes(x = Time, y = as.factor(Year))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..), scale = 5, size = 0.1
+    ) +
+    scale_fill_gradientn(
+      colours = c("red", "purple", "blue"),
+      name = "Time to finish",
+      breaks = tick_positions,
+      labels = custom_ticks
+    ) +
+   scale_x_continuous(labels = tick_labels, breaks = tick_positions
+    ) +
+    labs(title = 'Time Distribution by Year', y = "")
+
+ plot_time_dist
+```
+
+
+```{r, echo = FALSE}
+# Probalby not using this but saving the code in case we need a single scatter plot
+
+# Creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and its trend line
+
+#scat_plot <- function(curr_year, df) {
+  # Subsetting data by given year
+#  sub_data <- df %>% filter(Year == curr_year)
+  
+  # Scatterplot using ggplot2
+#  ggplot(sub_data, aes(x = Age, y = as.numeric(Time))) +
+#    geom_point(col = "blue", shape = 1) +
+#    geom_smooth(method = "lm", se = FALSE, col = "red") +
+#    labs(title = as.character(curr_year), x = "Age (years)", y = "Time (hh:mm)") +
+#    scale_y_continuous(labels = custom_ticks, breaks = tick_positions)
+#}
+
+# Setting up the layout
+#par(mfrow = c(2, 4))
+
+# Loops over years 1973:2019 and calls the scat_plot function
+# unique(Year) skips 1977 and will work still work if we remove other years
+#for (curr_year in unique(df$Year)) {
+#  print(scat_plot(curr_year, df))
+#}
+
+```
+
+```{r scatterplot by year, echo=FALSE, warning=FALSE, fig.dim = c(8, 16)}
+
+#splitting time to seconds
+ time_components <- strsplit(as.character(df$Time), ":")
+ df$Time_in_seconds <- sapply(time_components, function(x) {
+   as.numeric(x[1]) * 3600 + as.numeric(x[2]) * 60 + as.numeric(x[3])
+ })
+
+# Convert 'Time_in_seconds' back to "hh:mm" format for y-axis labels
+df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, 
+(df$Time_in_seconds %% 3600) %/% 60)
+
+#scatterplot of Age vs Time all data 
+ggplot(df,aes(x=Age, y=Time_in_seconds))+
+  geom_point(alpha= 0.1, color="purple", size = .5)+
+  labs(title = "Age vs Time scatterplots", y="Time (hr:min:sec)")+
+  geom_smooth(formula = y ~ x, method = lm, se = FALSE)+
+  scale_y_continuous(labels = function(x) as.character(hms(seconds = x), 
+  format = "%H:%M")) +
+  theme_bw()+
+  facet_wrap(~as.factor(Year),ncol = 5)
+```
+
+
+
+
+
+```{r time to seconds, eval=FALSE, warning=FALSE, include=FALSE}
+
+#splitting time to seconds
+ time_components <- strsplit(as.character(df$Time), ":")
+ df$Time_in_seconds <- sapply(time_components, function(x) {
+   as.numeric(x[1]) * 3600 + as.numeric(x[2]) * 60 + as.numeric(x[3])
+ })
+
+# Convert 'Time_in_seconds' back to "hh:mm" format for y-axis labels
+df$Time_hh_mm <- sprintf("%02d:%02d", df$Time_in_seconds %/% 3600, 
+(df$Time_in_seconds %% 3600) %/% 60)
+```
+
+```{r eval=FALSE, include=FALSE}
+ggplot(df, aes(x=(pos_by_sex/total_by_sex), y = Time_in_seconds))+
+  geom_point(alpha = 0.2, color = "violet", size=0.5)
+```
+
+```{r finding the best subset, include=FALSE}
+best_subset <- regsubsets(Time_in_seconds ~ Age + Sex 
+                          + PRCP + TMAX + TMIN , data = df)
+summary(best_subset)
+
+```
+
+```{r include=FALSE}
+model <- lm(Time_in_seconds ~  Sex+ Age + PRCP + TMAX + TMIN , data = df)
+summary(model)
+
+
+```
+
+
+
+```{r qqplot, echo=FALSE}
+ols_plot_resid_qq(model, print_plot = TRUE)
+```
+
+
+```{r res vs fit, echo=FALSE, warning=FALSE}
+#ols_plot_resid_fit(model, print_plot = TRUE)
+
+ggplot(model, aes(x= .fitted, y= .resid))+
+  geom_point(alpha = 0.1, color="violet", size = 0.5)+
+  geom_hline(yintercept = 0, color = "red")+
+  labs(title = "Residual Error vs Fitted Values",
+       y = "Residual Errors(seconds)", x="Fitted Values(seconds)")+
+  theme_bw()
+```
+
+

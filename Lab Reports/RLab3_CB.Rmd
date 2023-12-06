@@ -1,0 +1,354 @@
+---
+title: "Lab 3"
+output: rmdformats::downcute
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3DS : Cherry Blossom
+
+## Lyuda Bekwinknoll, Meghana Cyanam, Theresa Marie Duenas, Kevin Kiser
+
+**Complete the following lab as a group. This document should exist in your GitHub repo while you're working on it. Your code should be heavily commented so someone reading your code can follow along easily. See the first code snippet below for an example of commented code.**
+
+**Here's the catch: For any given problem, the person writing the code should not be the person commenting that code, and every person must both code AND comment at least one problem in this lab (you decide how to split the work). This will involve lots of pushing and pulling through Git, and you may have to resolve conflicts if you're not careful!**
+
+**ALSO, all plots generated should have labeled axes, titles, and legends when appropriate. Don't forget units of measurement! Make sure these plots could be interpreted by your client.**
+
+```{r import_data, message = F}
+
+# load packages
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(chron)
+library(plotly)
+library(purrr)
+library(RColorBrewer)
+
+```
+
+# Cherry Blossom Race Plotting Problems
+
+# Question 1
+
+1)  Looking at race times all on their own.
+    a)  Import the data from `CBdata.1_10.RData` and combine all 10 year's worth of data into one data frame, removing observations with missing age or time data (this should be very similar to previous labs). For each year, create a histogram of race times and plot a the corresponding density curve in the same figure. Arrange all ten of these plots into one figure
+
+
+```{r 1_a_clean}
+# load cherry blossom data
+load("CBdata.1_10.RData")
+
+# create one df and remove 'Pis/Tis' column and NAs from 'Age' and 'Time'
+cleaned_data <- bind_rows(CBdata.1_10) %>%
+  filter(!is.na(Age)) %>%
+  filter(!is.na(Time) & Time != "") %>%
+  select(-'PiS/TiS')
+
+```
+
+```{r, message = F}
+# Remove any none-numeric and non-column characters from 'Time'
+cleaned_data$Time <- gsub("[^0-9:]", "", cleaned_data$Time)
+
+# Remove NA's from 'Time' 
+cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
+
+# Remove empty strings from 'Time'
+cleaned_data <- cleaned_data[cleaned_data$Time != '', , drop = FALSE]
+
+# Converts 'Time' column to a time format
+cleaned_data$Time <- chron::times(cleaned_data$Time)
+
+# Removes any potential NA's generated from the conversion above
+cleaned_data <- cleaned_data[!is.na(cleaned_data$Time), , drop = FALSE]
+```
+
+```{r summary_check}
+
+# calculate the mean, min, max per 'Year' for 'Time'
+summary_by_year <- cleaned_data %>%
+  group_by(Year) %>%
+  summarize(
+    mean_Time = mean(Time),
+    min_Time = min(Time),
+    max_Time = max(Time),
+    participants = n()
+  )
+
+# print out summary generated above to have an idea of our data distribution
+print(summary_by_year)
+```
+
+```{r 1_a_plot}
+
+# Creates function that creates histogram and density plot pairs for dif years
+# Takes in 2 arguments: 'plot_year' and 'cleaned_data'
+plot_histogram_density <- function(plot_year, cleaned_data) {
+  
+  # pulls out data from 'cleaned_data' based on 'plot_year'
+  subset_data <- cleaned_data[cleaned_data$Year == plot_year, ]
+  
+  # makes histogram of data without plotting it
+  hist_data <- hist(subset_data$Time, breaks = 10, plot = FALSE)
+  
+  # plots above generated histogram with color and labels
+  plot(hist_data, col = "lightblue",
+       main = paste("", plot_year),
+       xlab = "Time (hr:min)",
+       ylab = "Density",
+       freq = FALSE, xaxt = "n")
+  # custom x-axis with labels as hours and minutes
+  axis(1, at = hist_data$breaks,
+       labels = chron(times = hist_data$breaks, format = "h:mm"),
+       las = 2)
+  # adds density plot line in blue over histogram
+  lines(density(subset_data$Time), col = "blue", lwd = 2)
+}
+
+# creates 2x5 martix layout for plots
+par(mfrow = c(2, 5))
+
+# loops over years 1973:1982 and calls function above to 
+# generate histogram and density plot
+for (year in 1973:1982) {
+  plot_histogram_density(year, cleaned_data)
+}
+
+```
+
+There were only two participants in 1973 with age and time recorded.
+
+b)  Plot the density curves for all ten years in one figure, along with a density curve of the combined data set (for a total of 11 curves). The main focus should be displaying the combined density, but all 11 densities should be discernible.
+
+```{r}
+# creates density data
+density_data <- density(cleaned_data$Time)
+
+# makes a organization of years
+years <- unique(cleaned_data$Year)
+
+#colors for graph
+line_colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", 
+                 "purple", "blue", "cornflowerblue", "darkgreen", "lightgreen")
+
+
+custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+tick_positions <- seq(min(density_data$x), max(density_data$x), 
+                      length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+# plots line of all years density 
+p <- plot_ly() %>%
+  add_trace(type = "scatter",
+            mode = "lines",
+            x = density_data$x,
+            y = density_data$y,
+            line = list(color = "black", width = 5),
+            name = "All Years") %>%
+  layout(title = "Density Curve by Year",
+         xaxis = list(title = "Time (hr:min)", showline = TRUE, 
+                      tickvals = tick_positions, ticktext = custom_ticks),
+         yaxis = list(title = "Density", showline = TRUE),
+         showlegend = TRUE)
+
+# plots lines for years 1973 - 1982 density
+for (i in seq_along(years)) {
+  year <- years[i]
+  subset_data <- cleaned_data[cleaned_data$Year == year, ]
+  p <- add_trace(p,
+                 type = "scatter",
+                 mode = "lines",
+                 x = density(subset_data$Time)$x,
+                 y = density(subset_data$Time)$y,
+                 line = list(color = line_colors[i], width = 3, 
+                             dash = ifelse(year %% 2 == 0, "solid", "dash")),
+                 name = as.character(year))
+}
+
+p
+
+```
+
+**The above plot is interactive. Click the lines in the legend to remove or add a line.**
+
+# Question 2
+
+2)  Correlating age and time: Create a scatter plot of age and race time, with time being the response. All ten year's worth of data should be included, but you should be able to tell which year each point comes from. Include trend lines for each year, along with a trend line for the combined data set.
+
+```{r}
+
+# Colors for the graph
+colors <- c("red", "#ffd92f", "orange", "firebrick", "magenta", "purple",
+            "blue", "cornflowerblue", "darkgreen", "lightgreen")
+
+# Creating a scatterplot function that inputs the current year and data and
+# outputs scatterplot for the year and its trend line
+scat_plot <- function(curr_year, cleaned_data)
+{
+
+  # Subsetting data by given year
+  sub_data <- cleaned_data %>% filter(Year == curr_year)
+  
+  # Scatterplot of age vs time 
+  plot(sub_data$Time ~ sub_data$Age,
+       main = curr_year,
+       xlab = "Age (years)",
+       ylab = "Time (hh:mm)",
+       yaxt = "n",
+       xlim = c(0, 80),
+       col = colors[curr_year - 1972]
+  )
+  
+  # Plots the trendline
+  abline(lm(sub_data$Time ~ sub_data$Age), col = "black")
+
+  # Custom y-axis labels displayed as time
+  custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+  tick_positions <- seq(min(sub_data$Time), max(sub_data$Time), length.out = length(custom_ticks))
+  axis(2, at = tick_positions, labels = custom_ticks, las = 2)
+}
+
+# Creates a 2x5 matrix layout for plots
+par(mfrow = c(2, 5))
+
+# Loops over years 1973:1982 and calls function scat_plot to 
+# generate scatterplot and trendline
+for (curr_year in 1973:1982)
+{
+  scat_plot(curr_year, cleaned_data)
+}
+
+```
+
+```{r}
+#Code for creating a single scatterplot for all 10-years of data
+
+#assigning y and x values for the data
+y = cleaned_data$Time
+x = cleaned_data$Age
+
+#creating a scatterplot for all data (colored by year) and the trend line
+plot(x, y, col = colors[factor(cleaned_data$Year - 1972)], yaxt = "n", 
+     xlab = "Age (years)", ylab = "Time(hh:mm)", 
+     xlim = c(0,80))
+title(main = "Runners age and time from 1973 - 1982")
+abline(lm(y~x), col = "black", lwd = 3)
+
+# loops over years 1973:1982 and generates a trendline for each year
+for (curr_year in 1973:1982)
+{
+  sub_data = cleaned_data %>% filter(Year == curr_year)
+  abline(lm(sub_data$Time ~ sub_data$Age), col = colors[curr_year - 1972])
+}
+
+# creates a legend for the plot
+legend("right", inset = .005, title = "Years",legend = c( "All years", 1973:1982), fill = c("black", colors))
+
+# custome y-axis labels displayed as time
+custom_ticks <- c("00:42", "01:13", "01:45", "02:17", "02:49")
+tick_positions <- seq(min(y), max(y), 
+                      length.out = length(custom_ticks))
+tick_labels <- as.numeric(tick_positions)
+
+# Now you can use these custom ticks and labels on the y-axis
+axis(2, at = tick_positions, labels = custom_ticks, las = 2)
+
+```
+
+Write a short interpretation of the plot as if you were explaining it to your client.
+
+As The ages increase, the times of the runners increase as well. 
+
+**Looking at the black line showing the general linear trend of the runners we can see that as the ages of runners increased so did the time.**
+
+# Question 3
+
+3)  Relating age and times categorically:\
+    We're interested in the age composition for ten performance groups. The performance groups are defined based ten percentiles (10%, 20%,...100%) of relative finish position. For example, someone finishing 3rd out of 125 would be in the 10th-percentile group, while someone finishing 985 out of 1013 would be in the 100th-percentile group.\
+    The age groups we're interested in are defined by decade, so separate people in their 20's from people in their 30's and so forth.\
+    Generate one plot that displays the age composition of each of the ten performance groups. Make sure you're using all ten year's worth of data.\
+    Hint: You can compute performance groups manually from `Year` and `Time`, or by carefully manipulating `Pis/Tis`.
+
+```{r 3}
+
+# Define percentiles
+percentile <- c("10th", "20th", "30th", "40th", "50th", "60th", "70th", "80th", "90th", "100th")
+
+# Create an empty matrix for cleaned data performance with 10 columns
+cleaned_data_Performance <- matrix(ncol = 10)
+
+# Set column names for the matrix
+colnames(cleaned_data_Performance) <- c(colnames(cleaned_data), "centile")
+
+# Iterate over each year in the dataset
+for (i in unique(cleaned_data$Year)){
+
+  # Filter data for the current year and calculate percentiles
+  temp <- as_tibble(cleaned_data) %>% 
+    filter(Year == i ) %>% 
+    mutate(centile = ecdf(.data$Time)(.data$Time))  
+
+  # Append the data to the performance matrix
+  invisible(cleaned_data_Performance <- rbind(cleaned_data_Performance, temp))
+}
+
+# Remove the first row (empty) from the performance matrix
+cleaned_data_Performance <- cleaned_data_Performance[-1,]
+
+# Convert the performance matrix to a tibble and create a new column 'Percentile'
+cleaned_data_Performance <- as_tibble(cleaned_data_Performance) %>% 
+  mutate(Percentile = case_when(
+    centile < 0.10 ~ percentile[1],
+    centile >= 0.10 & centile < 0.20 ~ percentile[2],
+    centile >= 0.20 & centile < 0.30 ~ percentile[3],
+    centile >= 0.30 & centile < 0.40 ~ percentile[4],
+    centile >= 0.40 & centile < 0.50 ~ percentile[5],
+    centile >= 0.50 & centile < 0.60 ~ percentile[6],
+    centile >= 0.60 & centile < 0.70 ~ percentile[7],
+    centile >= 0.70 & centile < 0.80 ~ percentile[8],
+    centile >= 0.80 & centile < 0.90 ~ percentile[9],
+    centile >= 0.90 & centile <= 1.0 ~ percentile[10]
+  )) %>% 
+  select(-centile)
+
+# Define age groups
+ageGroup <- c("0-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79+")
+
+# Add a new column 'AgeGroup' based on the age ranges
+cleaned_data_Performance <- as_tibble(cleaned_data_Performance) %>% 
+  mutate(AgeGroup = case_when(
+    Age < 20 ~ ageGroup[1],
+    Age >= 20 & Age < 30 ~ ageGroup[2],
+    Age >= 30 & Age < 40 ~ ageGroup[3],
+    Age >= 40 & Age < 50 ~ ageGroup[4],
+    Age >= 50 & Age < 60 ~ ageGroup[5],
+    Age >= 60 & Age < 70 ~ ageGroup[6],
+    Age >= 70 ~ ageGroup[7]
+  ))
+
+
+# Create a 2D histogram plot using plotly
+age_percentile_histogram <- cleaned_data_Performance %>%
+  plot_ly(x = ~ AgeGroup, 
+          y = ~ Percentile, 
+          type = "histogram2d", colorscale = "rainbow", 
+          ygap = 1, xgap = 1) %>%
+  layout(title = "Age vs Performance",
+         xaxis = list(title = "Age Group (in years)"),
+         yaxis = list(title = "Percentile", categoryorder = "array", categoryarray = percentile),
+         legend = list(title = "Counts"))
+
+# Display the plot
+age_percentile_histogram
+
+```
+
+
+This interactive heat map of performance group in percentiles by age group shows the counts by color ranging from 0-600
+
+
+
