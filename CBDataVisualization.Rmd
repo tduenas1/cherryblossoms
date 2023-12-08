@@ -465,6 +465,42 @@ kable(summary(mdf_group_70_87), caption = "Statistics for Ages 70 to 87")
 
 Males tend to finish faster than females, but over time, race times become slower. These statistics broken down by gender are very useful and seem like they will provide answers to our analysis.
 
+```{r, echo=FALSE}
+
+agegroup_times <- data.frame(
+  Gender = rep(c("Overall", "Female", "Male"), each = 7),
+  AgeGroup = rep(c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"), times = 3),
+  MeanTime = c(
+    "01:25:07", "01:31:01", "01:30:36", "01:31:07", "01:34:44", "01:39:19", "01:44:12",  # Overall
+    "01:33:58", "01:36:02", "01:38:02", "01:40:00", "01:43:34", "01:47:13", "01:50:15",  # Female
+    "01:18:45", "01:22:27", "01:23:25", "01:24:59", "01:29:54", "01:36:15", "01:42:30"   # Male
+  )
+)
+
+agegroup_times$MeanTime <- times(agegroup_times$MeanTime)
+
+#reorder so 8-19 comes first on plot
+agegroup_times$AgeGroup <- factor(agegroup_times$AgeGroup, levels = c("8-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-87"))
+
+
+custom_ticks <- c("00:43", "01:07", "01:30", "01:56", "02:20")
+tick_positions <- seq(min(agegroup_times$MeanTime), max(agegroup_times$MeanTime), length.out = length(custom_ticks))
+tick_labels <- times(tick_positions)
+
+custom_colors <- c("Overall" = "purple", "Female" = "pink", "Male" = "blue")
+
+ggplot(agegroup_times, aes(x = AgeGroup, y = MeanTime, fill = Gender)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  labs(title = "Figure 1: Mean Time by Age Group and Gender",
+       x = "Age Group",
+       y = "Mean Time") +
+  scale_y_continuous(labels = tick_labels, breaks = tick_positions) +
+  scale_fill_manual(values = custom_colors) +
+  coord_cartesian(ylim = c(min(agegroup_times$MeanTime), max(agegroup_times$MeanTime, na.rm = TRUE)))
+
+```
+
+
 ```{r}
 # T-tests start here
 
