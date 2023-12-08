@@ -789,6 +789,22 @@ This plot shows the density of time distribution by year. We can see that with e
 
 ```
 
+```{r}
+streakdf <- read.csv("cb_streakers2.csv", check.names = FALSE)
+streakdf_long <- reshape2::melt(streakdf, id.vars = "Age", variable.name = "Name")
+streakdf_long$value[streakdf_long$value == ""] <- NA
+streakdf_long <- na.omit(streakdf_long)
+colors <- rainbow(20)
+plot_ly(streakdf_long, x = ~Age, y = ~value, color = ~Name, type = 'scatter', mode = 'lines',
+         colors = colors) %>%
+  layout(title = "Individual Performance \n Most Consectutive Races",
+         xaxis = list(title = "Age"),
+         yaxis = list(title = "Time",
+                      dtick = 10, #tick space 10mins
+                      tickformat = "%H:%M")) 
+```
+
+
 ```{r scatterplot by year, echo=FALSE, warning=FALSE, fig.dim = c(8, 16)}
 
 #splitting time to seconds
